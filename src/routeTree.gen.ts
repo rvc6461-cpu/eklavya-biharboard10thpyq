@@ -9,38 +9,126 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PracticeRouteImport } from './routes/practice'
+import { Route as MistakesRouteImport } from './routes/mistakes'
+import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PracticeSubjectRouteImport } from './routes/practice.$subject'
+import { Route as PracticeSubjectChapterRouteImport } from './routes/practice.$subject.$chapter'
 
+const PracticeRoute = PracticeRouteImport.update({
+  id: '/practice',
+  path: '/practice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MistakesRoute = MistakesRouteImport.update({
+  id: '/mistakes',
+  path: '/mistakes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookmarksRoute = BookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PracticeSubjectRoute = PracticeSubjectRouteImport.update({
+  id: '/$subject',
+  path: '/$subject',
+  getParentRoute: () => PracticeRoute,
+} as any)
+const PracticeSubjectChapterRoute = PracticeSubjectChapterRouteImport.update({
+  id: '/$chapter',
+  path: '/$chapter',
+  getParentRoute: () => PracticeSubjectRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/mistakes': typeof MistakesRoute
+  '/practice': typeof PracticeRouteWithChildren
+  '/practice/$subject': typeof PracticeSubjectRouteWithChildren
+  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/mistakes': typeof MistakesRoute
+  '/practice': typeof PracticeRouteWithChildren
+  '/practice/$subject': typeof PracticeSubjectRouteWithChildren
+  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bookmarks': typeof BookmarksRoute
+  '/mistakes': typeof MistakesRoute
+  '/practice': typeof PracticeRouteWithChildren
+  '/practice/$subject': typeof PracticeSubjectRouteWithChildren
+  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/bookmarks'
+    | '/mistakes'
+    | '/practice'
+    | '/practice/$subject'
+    | '/practice/$subject/$chapter'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/bookmarks'
+    | '/mistakes'
+    | '/practice'
+    | '/practice/$subject'
+    | '/practice/$subject/$chapter'
+  id:
+    | '__root__'
+    | '/'
+    | '/bookmarks'
+    | '/mistakes'
+    | '/practice'
+    | '/practice/$subject'
+    | '/practice/$subject/$chapter'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookmarksRoute: typeof BookmarksRoute
+  MistakesRoute: typeof MistakesRoute
+  PracticeRoute: typeof PracticeRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/practice': {
+      id: '/practice'
+      path: '/practice'
+      fullPath: '/practice'
+      preLoaderRoute: typeof PracticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mistakes': {
+      id: '/mistakes'
+      path: '/mistakes'
+      fullPath: '/mistakes'
+      preLoaderRoute: typeof MistakesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookmarks': {
+      id: '/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof BookmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +136,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/practice/$subject': {
+      id: '/practice/$subject'
+      path: '/$subject'
+      fullPath: '/practice/$subject'
+      preLoaderRoute: typeof PracticeSubjectRouteImport
+      parentRoute: typeof PracticeRoute
+    }
+    '/practice/$subject/$chapter': {
+      id: '/practice/$subject/$chapter'
+      path: '/$chapter'
+      fullPath: '/practice/$subject/$chapter'
+      preLoaderRoute: typeof PracticeSubjectChapterRouteImport
+      parentRoute: typeof PracticeSubjectRoute
+    }
   }
 }
 
+interface PracticeSubjectRouteChildren {
+  PracticeSubjectChapterRoute: typeof PracticeSubjectChapterRoute
+}
+
+const PracticeSubjectRouteChildren: PracticeSubjectRouteChildren = {
+  PracticeSubjectChapterRoute: PracticeSubjectChapterRoute,
+}
+
+const PracticeSubjectRouteWithChildren = PracticeSubjectRoute._addFileChildren(
+  PracticeSubjectRouteChildren,
+)
+
+interface PracticeRouteChildren {
+  PracticeSubjectRoute: typeof PracticeSubjectRouteWithChildren
+}
+
+const PracticeRouteChildren: PracticeRouteChildren = {
+  PracticeSubjectRoute: PracticeSubjectRouteWithChildren,
+}
+
+const PracticeRouteWithChildren = PracticeRoute._addFileChildren(
+  PracticeRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookmarksRoute: BookmarksRoute,
+  MistakesRoute: MistakesRoute,
+  PracticeRoute: PracticeRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

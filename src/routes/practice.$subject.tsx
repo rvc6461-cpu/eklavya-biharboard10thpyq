@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight, CheckCircle2 } from "lucide-react";
-import { getSubject } from "@/lib/pyq/data";
+import { getSubject, type Chapter, type Question } from "@/lib/pyq/data";
 import { usePyqStore } from "@/lib/pyq/store";
 
 export const Route = createFileRoute("/practice/$subject")({
@@ -36,9 +36,9 @@ function SubjectPage() {
         </header>
 
         <main className="space-y-3 px-5">
-          {subject.chapters.map((ch) => {
-            const attempted = ch.questions.filter((q) => state.attempts[q.id]).length;
-            const correct = ch.questions.filter((q) => state.attempts[q.id]?.correct).length;
+          {subject.chapters.map((ch: Chapter) => {
+            const attempted = ch.questions.filter((q: Question) => state.attempts[q.id]).length;
+            const correct = ch.questions.filter((q: Question) => state.attempts[q.id]?.correct).length;
             const pct = ch.questions.length ? Math.round((attempted / ch.questions.length) * 100) : 0;
             return (
               <Link

@@ -126,7 +126,7 @@ function PracticeSession() {
           </div>
 
           <div className="space-y-2.5">
-            {question.options.map((opt, i) => (
+            {question.options.map((opt: string, i: number) => (
               <OptionButton
                 key={i}
                 index={i}
