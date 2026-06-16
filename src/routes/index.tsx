@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BookOpen,
   FileText,
@@ -235,32 +235,36 @@ function SubjectCard({ subject }: { subject: Subject }) {
   );
 }
 
-type Tool = { icon: LucideIcon; label: string; sub: string; tint: string; bg: string };
+type Tool = { icon: LucideIcon; label: string; sub: string; tint: string; bg: string; to?: string };
 const TOOLS: Tool[] = [
-  { icon: BookOpen, label: "PYQ Practice", sub: "Chapter-wise · Offline", tint: "text-indigo-300", bg: "bg-indigo-500/15" },
+  { icon: BookOpen, label: "PYQ Practice", sub: "Chapter-wise · Offline", tint: "text-indigo-300", bg: "bg-indigo-500/15", to: "/practice" },
   { icon: FlaskConical, label: "Mock Test", sub: "Full length · Live", tint: "text-emerald-300", bg: "bg-emerald-500/15" },
   { icon: FileText, label: "PYQ Papers", sub: "PDF library", tint: "text-sky-300", bg: "bg-sky-500/15" },
   { icon: Sparkles, label: "Formula Sheet", sub: "Quick revision", tint: "text-amber-300", bg: "bg-amber-500/15" },
-  { icon: NotebookPen, label: "Mistake Book", sub: "Learn from errors", tint: "text-rose-300", bg: "bg-rose-500/15" },
+  { icon: NotebookPen, label: "Mistake Book", sub: "Learn from errors", tint: "text-rose-300", bg: "bg-rose-500/15", to: "/mistakes" },
   { icon: LineChart, label: "Analytics", sub: "Track progress", tint: "text-violet-300", bg: "bg-violet-500/15" },
 ];
 
 function ToolsGrid() {
   return (
     <div className="grid grid-cols-2 gap-3">
-      {TOOLS.map((t) => (
-        <button
-          key={t.label}
-          type="button"
-          className="bg-gradient-card rounded-2xl border border-border p-4 text-left transition hover:border-primary/50"
-        >
-          <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.bg}`}>
-            <t.icon className={`h-5 w-5 ${t.tint}`} strokeWidth={2.2} />
-          </div>
-          <p className="mt-3 font-display text-sm font-bold">{t.label}</p>
-          <p className="text-[11px] text-muted-foreground">{t.sub}</p>
-        </button>
-      ))}
+      {TOOLS.map((t) => {
+        const inner = (
+          <>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.bg}`}>
+              <t.icon className={`h-5 w-5 ${t.tint}`} strokeWidth={2.2} />
+            </div>
+            <p className="mt-3 font-display text-sm font-bold">{t.label}</p>
+            <p className="text-[11px] text-muted-foreground">{t.sub}</p>
+          </>
+        );
+        const cls = "bg-gradient-card rounded-2xl border border-border p-4 text-left transition hover:border-primary/50";
+        return t.to ? (
+          <Link key={t.label} to={t.to} className={cls}>{inner}</Link>
+        ) : (
+          <button key={t.label} type="button" className={cls}>{inner}</button>
+        );
+      })}
     </div>
   );
 }
@@ -354,25 +358,25 @@ function StreakCard() {
 
 function BottomNav() {
   const items = [
-    { icon: GraduationCap, label: "Home", active: true },
-    { icon: BookOpen, label: "Practice" },
-    { icon: FlaskConical, label: "Mock" },
-    { icon: LineChart, label: "Stats" },
+    { icon: GraduationCap, label: "Home", active: true, to: "/" },
+    { icon: BookOpen, label: "Practice", to: "/practice" },
+    { icon: FlaskConical, label: "Mock", to: "/" },
+    { icon: LineChart, label: "Stats", to: "/" },
   ];
   return (
     <nav className="fixed right-0 bottom-0 left-0 z-50 mx-auto max-w-md px-5 pb-5">
       <div className="shadow-card-premium flex items-center justify-around rounded-3xl border border-border bg-card/95 px-2 py-2.5 backdrop-blur-xl">
         {items.map((it) => (
-          <button
+          <Link
             key={it.label}
-            type="button"
+            to={it.to}
             className={`flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 transition ${
               it.active ? "bg-primary/15 text-primary" : "text-muted-foreground"
             }`}
           >
             <it.icon className="h-5 w-5" strokeWidth={it.active ? 2.6 : 2} />
             <span className="text-[10px] font-semibold">{it.label}</span>
-          </button>
+          </Link>
         ))}
       </div>
     </nav>
