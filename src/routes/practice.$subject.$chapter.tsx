@@ -38,7 +38,7 @@ function PracticeSession() {
   const [done, setDone] = useState(false);
 
   const order = useMemo(() => {
-    const arr = chapter.questions.map((_, i) => i);
+    const arr = chapter.questions.map((_: Question, i: number) => i);
     if (!shuffle) return arr;
     // seeded Fisher–Yates so order is stable within a session
     let s = shuffleSeed || 1;
