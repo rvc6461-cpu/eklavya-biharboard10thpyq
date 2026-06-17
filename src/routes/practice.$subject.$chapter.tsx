@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-ro
 import { useMemo, useState } from "react";
 import {
   ArrowLeft, Bookmark, BookmarkCheck, Check, X, ChevronRight,
-  RotateCcw, Trophy, Lightbulb,
+  RotateCcw, Trophy, Lightbulb, Shuffle,
 } from "lucide-react";
 import { getChapter, type Question } from "@/lib/pyq/data";
 import { usePyqStore } from "@/lib/pyq/store";
