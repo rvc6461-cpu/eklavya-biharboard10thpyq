@@ -81,3 +81,80 @@ describe("usePyqStore bookmark behavior", () => {
     expect(result.current.state.mistakes).toContain(QID_A);
   });
 });
+
+describe("usePyqStore mistake notebook persistence", () => {
+  const mkAttempt = (questionId: string, correct: boolean) => ({
+    questionId,
+    subjectId: "math",
+    chapterId: "ch1",
+    selected: 0,
+    correct,
+    at: Date.now(),
+  });
+
+  it("adds a wrong answer to mistakes once and does not duplicate on re-attempt", () => {
+    const { result } = renderHook(() => usePyqStore());
+
+    act(() => result.current.recordAttempt(mkAttempt(QID_A, false)));
+    expect(result.current.state.mistakes).toEqual([QID_A]);
+
+    // Retry the same wrong answer — still exactly one entry.
+    act(() => result.current.recordAttempt(mkAttempt(QID_A, false)));
+    expect(result.current.state.mistakes).toEqual([QID_A]);
+  });
+
+  it("removes from mistakes when later answered correctly", () => {
+    const { result } = renderHook(() => usePyqStore());
+
+    act(() => result.current.recordAttempt(mkAttempt(QID_A, false)));
+    expect(result.current.state.mistakes).toContain(QID_A);
+
+    act(() => result.current.recordAttempt(mkAttempt(QID_A, true)));
+    expect(result.current.state.mistakes).not.toContain(QID_A);
+  });
+
+  it("preserves mistakes across simulated shuffle toggle / chapter retry remount", () => {
+    const a = renderHook(() => usePyqStore());
+    act(() => {
+      a.result.current.recordAttempt(mkAttempt(QID_A, false));
+      a.result.current.recordAttempt(mkAttempt(QID_B, false));
+    });
+    expect(a.result.current.state.mistakes).toEqual(
+      expect.arrayContaining([QID_A, QID_B]),
+    );
+
+    // Shuffle toggle / Retry both re-mount the practice screen → new hook read.
+    const remount = renderHook(() => usePyqStore());
+    expect(remount.result.current.state.mistakes).toEqual(
+      expect.arrayContaining([QID_A, QID_B]),
+    );
+  });
+
+  it("mistake entries are keyed by question id, not position, so shuffled order is irrelevant", () => {
+    const { result } = renderHook(() => usePyqStore());
+
+    // Simulate answering questions in one order...
+    act(() => {
+      result.current.recordAttempt(mkAttempt(QID_A, false));
+      result.current.recordAttempt(mkAttempt(QID_B, true));
+    });
+    const first = [...result.current.state.mistakes];
+
+    // ...then in the opposite (shuffled) order — net truth is the same set.
+    act(() => {
+      result.current.recordAttempt(mkAttempt(QID_B, true));
+      result.current.recordAttempt(mkAttempt(QID_A, false));
+    });
+    expect(result.current.state.mistakes.sort()).toEqual(first.sort());
+  });
+
+  it("toggling a bookmark does not add or remove mistake entries", () => {
+    const { result } = renderHook(() => usePyqStore());
+
+    act(() => result.current.recordAttempt(mkAttempt(QID_A, false)));
+    act(() => result.current.toggleBookmark(QID_A));
+    act(() => result.current.toggleBookmark(QID_A));
+
+    expect(result.current.state.mistakes).toEqual([QID_A]);
+  });
+});
