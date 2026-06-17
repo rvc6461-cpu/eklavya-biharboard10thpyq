@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-ro
 import { useMemo, useState } from "react";
 import {
   ArrowLeft, Bookmark, BookmarkCheck, Check, X, ChevronRight,
-  RotateCcw, Trophy, Lightbulb,
+  RotateCcw, Trophy, Lightbulb, Shuffle,
 } from "lucide-react";
 import { getChapter, type Question } from "@/lib/pyq/data";
 import { usePyqStore } from "@/lib/pyq/store";
@@ -29,24 +29,45 @@ function PracticeSession() {
   const navigate = useNavigate();
   const { state, recordAttempt, toggleBookmark } = usePyqStore();
 
+  const [shuffle, setShuffle] = useState(false);
+  const [shuffleSeed, setShuffleSeed] = useState(0);
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [done, setDone] = useState(false);
 
-  const total = chapter.questions.length;
-  const question = chapter.questions[idx];
+  const order = useMemo(() => {
+    const arr = chapter.questions.map((_: Question, i: number) => i);
+    if (!shuffle) return arr;
+    // seeded Fisher–Yates so order is stable within a session
+    let s = shuffleSeed || 1;
+    const rand = () => {
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, [chapter.questions, shuffle, shuffleSeed]);
+
+  const total = order.length;
+  const question = chapter.questions[order[idx]];
+
+  const resetSession = (reshuffle = false) => {
+    setIdx(0); setSelected(null); setRevealed(false);
+    setSessionCorrect(0); setDone(false);
+    if (reshuffle && shuffle) setShuffleSeed(Date.now());
+  };
 
   if (done) {
     return (
       <SessionSummary
         correct={sessionCorrect}
         total={total}
-        onRetry={() => {
-          setIdx(0); setSelected(null); setRevealed(false);
-          setSessionCorrect(0); setDone(false);
-        }}
+        onRetry={() => resetSession(true)}
         backHref={`/practice/${subject.id}`}
       />
     );
@@ -73,6 +94,13 @@ function PracticeSession() {
     setIdx(idx + 1); setSelected(null); setRevealed(false);
   };
 
+  const toggleShuffle = () => {
+    const nextOn = !shuffle;
+    setShuffle(nextOn);
+    setShuffleSeed(nextOn ? Date.now() : 0);
+    setIdx(0); setSelected(null); setRevealed(false); setSessionCorrect(0);
+  };
+
   const isBookmarked = state.bookmarks.includes(question.id);
 
   return (
@@ -92,6 +120,17 @@ function PracticeSession() {
             </p>
             <p className="truncate font-display text-sm font-bold">{chapter.name}</p>
           </div>
+          <button
+            onClick={toggleShuffle}
+            className={`flex h-10 w-10 items-center justify-center rounded-2xl border ${
+              shuffle ? "border-primary/60 bg-primary/15 text-primary" : "border-border bg-card text-muted-foreground"
+            }`}
+            aria-label="Shuffle questions"
+            aria-pressed={shuffle}
+            title={shuffle ? "Shuffle on" : "Shuffle off"}
+          >
+            <Shuffle className="h-5 w-5" />
+          </button>
           <button
             onClick={() => toggleBookmark(question.id)}
             className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card"
@@ -245,6 +284,3 @@ function SessionSummary({
     </div>
   );
 }
-
-// Avoid unused-import warning for useMemo if not needed
-void useMemo;
