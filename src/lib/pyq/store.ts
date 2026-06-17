@@ -20,16 +20,21 @@ export type PyqState = {
   mistakes: string[]; // questionIds where latest attempt was wrong
 };
 
-const empty: PyqState = { attempts: {}, bookmarks: [], mistakes: [] };
+const freshEmpty = (): PyqState => ({ attempts: {}, bookmarks: [], mistakes: [] });
 
 function read(): PyqState {
-  if (typeof window === "undefined") return empty;
+  if (typeof window === "undefined") return freshEmpty();
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return empty;
-    return { ...empty, ...JSON.parse(raw) };
+    if (!raw) return freshEmpty();
+    const parsed = JSON.parse(raw) as Partial<PyqState>;
+    return {
+      attempts: { ...(parsed.attempts ?? {}) },
+      bookmarks: [...(parsed.bookmarks ?? [])],
+      mistakes: [...(parsed.mistakes ?? [])],
+    };
   } catch {
-    return empty;
+    return freshEmpty();
   }
 }
 
