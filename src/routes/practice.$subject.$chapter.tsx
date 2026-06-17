@@ -284,6 +284,3 @@ function SessionSummary({
     </div>
   );
 }
-
-// Avoid unused-import warning for useMemo if not needed
-void useMemo;
