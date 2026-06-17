@@ -121,6 +121,17 @@ function PracticeSession() {
             <p className="truncate font-display text-sm font-bold">{chapter.name}</p>
           </div>
           <button
+            onClick={toggleShuffle}
+            className={`flex h-10 w-10 items-center justify-center rounded-2xl border ${
+              shuffle ? "border-primary/60 bg-primary/15 text-primary" : "border-border bg-card text-muted-foreground"
+            }`}
+            aria-label="Shuffle questions"
+            aria-pressed={shuffle}
+            title={shuffle ? "Shuffle on" : "Shuffle off"}
+          >
+            <Shuffle className="h-5 w-5" />
+          </button>
+          <button
             onClick={() => toggleBookmark(question.id)}
             className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card"
             aria-label="Bookmark"
