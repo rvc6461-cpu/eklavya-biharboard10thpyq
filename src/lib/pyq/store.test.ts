@@ -180,10 +180,8 @@ describe("usePyqStore offline-only mistake persistence", () => {
     const blocked = () => {
       throw new Error("network blocked: airplane mode");
     };
-    // @ts-expect-error — overriding for the test
-    window.fetch = blocked;
-    // @ts-expect-error
-    globalThis.fetch = blocked;
+    (window as unknown as { fetch: unknown }).fetch = blocked;
+    (globalThis as unknown as { fetch: unknown }).fetch = blocked;
   };
   const goOnline = () => {
     Object.defineProperty(window.navigator, "onLine", {
