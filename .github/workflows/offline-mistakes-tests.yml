@@ -31,10 +31,19 @@ jobs:
       - name: Run offline mistake notebook tests
         run: |
           for i in 1 2 3; do
-            echo "Attempt $i/3..."
-            bunx vitest run src/lib/pyq/store.test.ts && exit 0
-            echo "Transient failure, retrying..."
-            sleep 5
+            echo "::group::Attempt $i/3"
+            bunx vitest run src/lib/pyq/store.test.ts
+            EXIT_CODE=$?
+            echo "::endgroup::"
+            if [ $EXIT_CODE -eq 0 ]; then
+              echo "✅ Attempt $i/3 succeeded."
+              exit 0
+            fi
+            echo "❌ Attempt $i/3 failed with exit code $EXIT_CODE."
+            if [ $i -lt 3 ]; then
+              echo "⏳ Retrying in 5 seconds..."
+              sleep 5
+            fi
           done
-          echo "All retries exhausted."
+          echo "🚨 All 3 attempts exhausted — treating as persistent failure."
           exit 1
