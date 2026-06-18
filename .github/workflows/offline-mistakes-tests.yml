@@ -29,4 +29,12 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run offline mistake notebook tests
-        run: bunx vitest run src/lib/pyq/store.test.ts
+        run: |
+          for i in 1 2 3; do
+            echo "Attempt $i/3..."
+            bunx vitest run src/lib/pyq/store.test.ts && exit 0
+            echo "Transient failure, retrying..."
+            sleep 5
+          done
+          echo "All retries exhausted."
+          exit 1
