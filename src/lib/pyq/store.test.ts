@@ -158,3 +158,101 @@ describe("usePyqStore mistake notebook persistence", () => {
     expect(result.current.state.mistakes).toEqual([QID_A]);
   });
 });
+
+describe("usePyqStore offline-only mistake persistence", () => {
+  const KEY = "eklavya:pyq:v1";
+  const mkAttempt = (questionId: string, correct: boolean) => ({
+    questionId,
+    subjectId: "math",
+    chapterId: "ch1",
+    selected: 0,
+    correct,
+    at: Date.now(),
+  });
+
+  // Simulate airplane mode: any accidental network call must throw, proving
+  // the store never depends on connectivity.
+  const goOffline = () => {
+    Object.defineProperty(window.navigator, "onLine", {
+      configurable: true,
+      get: () => false,
+    });
+    const blocked = () => {
+      throw new Error("network blocked: airplane mode");
+    };
+    (window as unknown as { fetch: unknown }).fetch = blocked;
+    (globalThis as unknown as { fetch: unknown }).fetch = blocked;
+  };
+  const goOnline = () => {
+    Object.defineProperty(window.navigator, "onLine", {
+      configurable: true,
+      get: () => true,
+    });
+  };
+
+  it("writes mistakes to localStorage synchronously while offline", () => {
+    goOffline();
+    const { result } = renderHook(() => usePyqStore());
+
+    act(() => result.current.recordAttempt(mkAttempt(QID_A, false)));
+
+    const raw = window.localStorage.getItem(KEY);
+    expect(raw).not.toBeNull();
+    const parsed = JSON.parse(raw!) as { mistakes: string[] };
+    expect(parsed.mistakes).toContain(QID_A);
+    expect(navigator.onLine).toBe(false);
+  });
+
+  it("survives a full app restart: hook unmount + remount preserves mistakes", () => {
+    goOffline();
+    const first = renderHook(() => usePyqStore());
+    act(() => {
+      first.result.current.recordAttempt(mkAttempt(QID_A, false));
+      first.result.current.recordAttempt(mkAttempt(QID_B, false));
+    });
+    // Simulate app close: tear down the hook entirely.
+    first.unmount();
+
+    // App relaunch — fresh hook, fresh subscriptions, same localStorage.
+    const relaunched = renderHook(() => usePyqStore());
+    expect(relaunched.result.current.state.mistakes).toEqual(
+      expect.arrayContaining([QID_A, QID_B]),
+    );
+  });
+
+  it("persists across airplane-mode toggle (offline → online → offline)", () => {
+    goOffline();
+    const session = renderHook(() => usePyqStore());
+    act(() => session.result.current.recordAttempt(mkAttempt(QID_A, false)));
+    session.unmount();
+
+    // Toggle airplane mode OFF — coming back online must not wipe state.
+    goOnline();
+    const online = renderHook(() => usePyqStore());
+    expect(online.result.current.state.mistakes).toContain(QID_A);
+    act(() => online.result.current.recordAttempt(mkAttempt(QID_B, false)));
+    online.unmount();
+
+    // Toggle airplane mode ON again — still all there.
+    goOffline();
+    const offlineAgain = renderHook(() => usePyqStore());
+    expect(offlineAgain.result.current.state.mistakes).toEqual(
+      expect.arrayContaining([QID_A, QID_B]),
+    );
+  });
+
+  it("recordAttempt does not invoke fetch (no network dependency)", () => {
+    goOffline();
+    const { result } = renderHook(() => usePyqStore());
+
+    expect(() => {
+      act(() => result.current.recordAttempt(mkAttempt(QID_A, false)));
+      act(() => result.current.recordAttempt(mkAttempt(QID_B, false)));
+      act(() => result.current.toggleBookmark(QID_A));
+    }).not.toThrow();
+
+    expect(result.current.state.mistakes).toEqual(
+      expect.arrayContaining([QID_A, QID_B]),
+    );
+  });
+});
