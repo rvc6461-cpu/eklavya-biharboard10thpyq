@@ -6,11 +6,19 @@ on:
 
 jobs:
   test:
-    name: Run offline-only persistence suite
+    name: Run offline-only persistence suite (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20, 22]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
