@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test:offline-mistakes": "bash scripts/test-offline-mistakes.sh"
+    "test:offline-mistakes": "bash scripts/test-offline-mistakes.sh",
+    "test:offline-mistakes:local": "bash scripts/test-offline-mistakes.sh",
+    "test:offline-mistakes:node20": "bash -c 'source ~/.nvm/nvm.sh 2>/dev/null && nvm use 20 2>/dev/null || fnm use 20 2>/dev/null; bash scripts/test-offline-mistakes.sh'"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
