@@ -32,7 +32,7 @@ jobs:
         run: |
           for i in 1 2 3; do
             echo "::group::Attempt $i/3"
-            bunx vitest run src/lib/pyq/store.test.ts
+            bunx vitest run src/lib/pyq/store.test.ts > attempt-$i-stdout.log 2> attempt-$i-stderr.log
             EXIT_CODE=$?
             echo "::endgroup::"
             if [ $EXIT_CODE -eq 0 ]; then
@@ -40,6 +40,11 @@ jobs:
               exit 0
             fi
             echo "❌ Attempt $i/3 failed with exit code $EXIT_CODE."
+            echo "--- STDOUT ---"
+            cat attempt-$i-stdout.log
+            echo "--- STDERR ---"
+            cat attempt-$i-stderr.log
+            echo "--------------"
             if [ $i -lt 3 ]; then
               echo "⏳ Retrying in 5 seconds..."
               sleep 5
