@@ -14,8 +14,8 @@ SLEEP_SECONDS=5
 
 for i in $(seq 1 $RETRIES); do
   echo "::group::Attempt $i/$RETRIES"
-  bunx vitest run "$TEST_FILE" > "attempt-$i-stdout.log" 2> "attempt-$i-stderr.log" || true
-  EXIT_CODE=$?
+  EXIT_CODE=0
+  bunx vitest run "$TEST_FILE" > "attempt-$i-stdout.log" 2> "attempt-$i-stderr.log" || EXIT_CODE=$?
   echo "::endgroup::"
   if [ $EXIT_CODE -eq 0 ]; then
     echo "✅ Attempt $i/$RETRIES succeeded."
