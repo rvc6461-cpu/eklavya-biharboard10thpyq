@@ -122,16 +122,23 @@ function AuthPage() {
             {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
           </button>
         </form>
-        <button
-          onClick={() => {
-            setError(null);
-            setInfo(null);
-            setMode(mode === "signin" ? "signup" : "signin");
-          }}
-          className="mt-4 w-full text-center text-xs text-muted-foreground hover:text-foreground"
-        >
-          {mode === "signin" ? "Need an account? Sign up" : "Already have an account? Sign in"}
-        </button>
+        <div className="mt-4 flex flex-col gap-2 text-center text-xs">
+          <button
+            onClick={() => {
+              setError(null);
+              setInfo(null);
+              setMode(mode === "signin" ? "signup" : "signin");
+            }}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {mode === "signin" ? "Need an account? Sign up" : "Already have an account? Sign in"}
+          </button>
+          {mode === "signin" && (
+            <Link to="/forgot-password" className="text-primary hover:underline">
+              Forgot password?
+            </Link>
+          )}
+        </div>
       </div>
     </main>
   );
