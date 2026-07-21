@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useAuth, useProfile } from "@/hooks/useAuth";
 import {
   BookOpen,
   FileText,
@@ -65,27 +66,30 @@ function Home() {
 }
 
 function Header() {
+  const { user } = useAuth();
+  const { profile } = useProfile(user);
+  const name = profile?.display_name || user?.email?.split("@")[0] || "Guest";
   return (
     <header className="flex items-center justify-between px-5 pt-6 pb-5">
-      <div className="flex items-center gap-3">
+      <Link to={user ? "/profile" : "/auth"} className="flex items-center gap-3">
         <div className="bg-gradient-primary shadow-glow flex h-11 w-11 items-center justify-center rounded-2xl">
           <GraduationCap className="h-6 w-6 text-primary-foreground" strokeWidth={2.4} />
         </div>
         <div>
           <p className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-            Good morning
+            {user ? "Good morning" : "Welcome"}
           </p>
-          <h1 className="font-display text-base leading-tight font-bold">Aryan Kumar</h1>
+          <h1 className="font-display text-base leading-tight font-bold">{name}</h1>
         </div>
-      </div>
-      <button
-        type="button"
+      </Link>
+      <Link
+        to={user ? "/profile" : "/auth"}
         className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-card"
-        aria-label="Notifications"
+        aria-label={user ? "Profile" : "Sign in"}
       >
         <Bell className="h-5 w-5 text-muted-foreground" />
         <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-gold" />
-      </button>
+      </Link>
     </header>
   );
 }
