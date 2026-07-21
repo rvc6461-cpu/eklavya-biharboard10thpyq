@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useAuth, useProfile } from "@/hooks/useAuth";
 import {
   BookOpen,
   FileText,
