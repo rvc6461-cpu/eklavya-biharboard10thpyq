@@ -32,12 +32,6 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-type Stats = {
-  attempts: number;
-  correct: number;
-  bookmarks: number;
-  mistakes: number;
-};
 
 function ProfilePage() {
   const navigate = useNavigate();
