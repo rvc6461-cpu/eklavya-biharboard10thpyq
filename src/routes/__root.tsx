@@ -119,8 +119,16 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CloudSyncGate />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
+}
+
+function CloudSyncGate() {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useCloudSync } = require("@/hooks/useCloudSync") as typeof import("@/hooks/useCloudSync");
+  useCloudSync();
+  return null;
 }
