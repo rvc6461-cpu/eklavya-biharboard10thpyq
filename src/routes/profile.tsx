@@ -216,6 +216,10 @@ function ProfilePage() {
               value={stats.mistakes}
               tint="text-rose-500"
             />
+            <StatCard icon={Flame} label="Current Streak" value={`${stats.currentStreak}d`} tint="text-gold" />
+            <StatCard icon={Trophy} label="Best Streak" value={`${stats.bestStreak}d`} tint="text-amber-400" />
+            <StatCard icon={FlaskConical} label="Mock Tests" value={stats.mockTests} tint="text-emerald-400" />
+            <StatCard icon={Clock} label="Practice" value={`${stats.practiceMinutes}m`} tint="text-sky-400" />
           </div>
         </section>
 
@@ -224,15 +228,33 @@ function ProfilePage() {
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Mock test history
           </h3>
-          <div className="rounded-2xl border border-border bg-card p-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-              <FlaskConical className="h-5 w-5 text-primary" />
+          {mockTests.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-card p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                <FlaskConical className="h-5 w-5 text-primary" />
+              </div>
+              <p className="mt-3 text-sm font-medium text-foreground">No mock tests yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Take your first mock test to see performance history here.
+              </p>
             </div>
-            <p className="mt-3 text-sm font-medium text-foreground">No mock tests yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Take your first mock test to see performance history here.
-            </p>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              {mockTests.map((m) => (
+                <div key={m.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{m.test_name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {new Date(m.taken_at).toLocaleDateString()} · {m.score}/{m.total_questions} · {Math.round(m.time_taken_seconds / 60)}m
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-primary/15 px-2.5 py-1 text-xs font-bold text-primary">
+                    {Math.round(Number(m.percentage))}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Premium */}
