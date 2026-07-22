@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth, useProfile } from "@/hooks/useAuth";
+import { useLiveStats } from "@/hooks/useLiveStats";
 import {
   BookOpen,
   FileText,
@@ -122,14 +123,16 @@ function HeroCard() {
 }
 
 function StatsRow() {
-  const stats = [
-    { icon: Flame, label: "Streak", value: "12", suffix: "d", tint: "text-gold" },
-    { icon: Target, label: "Today", value: "28", suffix: "/50", tint: "text-primary" },
-    { icon: Trophy, label: "Solved", value: "1.2", suffix: "k", tint: "text-success" },
+  const { user } = useAuth();
+  const { stats } = useLiveStats(user);
+  const items = [
+    { icon: Flame, label: "Streak", value: user ? String(stats.currentStreak) : "0", suffix: "d", tint: "text-gold" },
+    { icon: Target, label: "Accuracy", value: user ? String(stats.accuracy) : "0", suffix: "%", tint: "text-primary" },
+    { icon: Trophy, label: "Solved", value: user ? formatK(stats.attempts) : "0", suffix: "", tint: "text-success" },
   ];
   return (
     <div className="grid grid-cols-3 gap-3">
-      {stats.map((s) => (
+      {items.map((s) => (
         <div
           key={s.label}
           className="bg-gradient-card rounded-2xl border border-border p-3.5"
@@ -144,6 +147,11 @@ function StatsRow() {
       ))}
     </div>
   );
+}
+
+function formatK(n: number) {
+  if (n < 1000) return String(n);
+  return (n / 1000).toFixed(1) + "k";
 }
 
 function ContinueCard() {
