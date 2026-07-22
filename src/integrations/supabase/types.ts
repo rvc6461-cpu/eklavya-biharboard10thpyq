@@ -113,6 +113,84 @@ export type Database = {
         }
         Relationships: []
       }
+      mock_tests: {
+        Row: {
+          accuracy: number
+          created_at: string
+          id: string
+          percentage: number
+          score: number
+          subject_id: string | null
+          taken_at: string
+          test_name: string
+          time_taken_seconds: number
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          accuracy?: number
+          created_at?: string
+          id?: string
+          percentage?: number
+          score: number
+          subject_id?: string | null
+          taken_at?: string
+          test_name: string
+          time_taken_seconds?: number
+          total_questions: number
+          user_id: string
+        }
+        Update: {
+          accuracy?: number
+          created_at?: string
+          id?: string
+          percentage?: number
+          score?: number
+          subject_id?: string | null
+          taken_at?: string
+          test_name?: string
+          time_taken_seconds?: number
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      practice_sessions: {
+        Row: {
+          chapter_id: string
+          created_at: string
+          id: string
+          last_practiced_at: string
+          last_question_index: number
+          subject_id: string
+          total_time_seconds: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chapter_id: string
+          created_at?: string
+          id?: string
+          last_practiced_at?: string
+          last_question_index?: number
+          subject_id: string
+          total_time_seconds?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chapter_id?: string
+          created_at?: string
+          id?: string
+          last_practiced_at?: string
+          last_question_index?: number
+          subject_id?: string
+          total_time_seconds?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

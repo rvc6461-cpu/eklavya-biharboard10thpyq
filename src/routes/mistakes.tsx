@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, NotebookPen, X } from "lucide-react";
+import { ArrowLeft, NotebookPen, X, ChevronRight } from "lucide-react";
 import { SUBJECTS, type Question } from "@/lib/pyq/data";
 import { usePyqStore } from "@/lib/pyq/store";
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/mistakes")({
   component: MistakesPage,
 });
 
-type Item = { q: Question; subjectName: string; chapterName: string; selected: number };
+type Item = { q: Question; subjectId: string; chapterId: string; subjectName: string; chapterName: string; selected: number };
 
 function MistakesPage() {
   const { state } = usePyqStore();
@@ -24,6 +24,8 @@ function MistakesPage() {
         if (state.mistakes.includes(q.id)) {
           items.push({
             q,
+            subjectId: s.id,
+            chapterId: c.id,
             subjectName: s.name,
             chapterName: c.name,
             selected: state.attempts[q.id]?.selected ?? -1,
@@ -54,7 +56,7 @@ function MistakesPage() {
               </p>
             </div>
           ) : (
-            items.map(({ q, subjectName, chapterName, selected }) => (
+            items.map(({ q, subjectId, chapterId, subjectName, chapterName, selected }) => (
               <div key={q.id} className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4">
                 <p className="text-[11px] font-semibold tracking-wider text-rose-300 uppercase">
                   {subjectName} · {chapterName}
@@ -71,6 +73,13 @@ function MistakesPage() {
                   {q.options[q.answer]}
                 </p>
                 <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{q.explanation}</p>
+                <Link
+                  to="/practice/$subject/$chapter"
+                  params={{ subject: subjectId, chapter: chapterId }}
+                  className="mt-3 inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-bold text-primary"
+                >
+                  Reattempt chapter <ChevronRight className="h-3 w-3" />
+                </Link>
               </div>
             ))
           )}

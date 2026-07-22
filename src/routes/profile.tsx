@@ -13,9 +13,13 @@ import {
   TrendingUp,
   CalendarDays,
   Check,
+  Flame,
+  Clock,
+  Trophy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useProfile } from "@/hooks/useAuth";
+import { useLiveStats, useMockTests } from "@/hooks/useLiveStats";
 
 export const Route = createFileRoute("/profile")({
   ssr: false,
@@ -28,18 +32,13 @@ export const Route = createFileRoute("/profile")({
   }),
 });
 
-type Stats = {
-  attempts: number;
-  correct: number;
-  bookmarks: number;
-  mistakes: number;
-};
 
 function ProfilePage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { profile, updateProfile } = useProfile(user);
-  const [stats, setStats] = useState<Stats>({ attempts: 0, correct: 0, bookmarks: 0, mistakes: 0 });
+  const { stats } = useLiveStats(user);
+  const mockTests = useMockTests(user);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [year, setYear] = useState<string>("");
@@ -48,28 +47,6 @@ function ProfilePage() {
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", search: { next: "/profile" } });
   }, [loading, user, navigate]);
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const [a, ac, b, m] = await Promise.all([
-        supabase.from("attempts").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase
-          .from("attempts")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id)
-          .eq("is_correct", true),
-        supabase.from("bookmarks").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("mistakes").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-      ]);
-      setStats({
-        attempts: a.count ?? 0,
-        correct: ac.count ?? 0,
-        bookmarks: b.count ?? 0,
-        mistakes: m.count ?? 0,
-      });
-    })();
-  }, [user]);
 
   useEffect(() => {
     if (profile) {
@@ -92,7 +69,7 @@ function ProfilePage() {
     ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })
     : "—";
 
-  const accuracy = stats.attempts > 0 ? Math.round((stats.correct / stats.attempts) * 100) : 0;
+  const accuracy = stats.accuracy;
 
   async function saveProfile() {
     setSaving(true);
@@ -239,6 +216,10 @@ function ProfilePage() {
               value={stats.mistakes}
               tint="text-rose-500"
             />
+            <StatCard icon={Flame} label="Current Streak" value={`${stats.currentStreak}d`} tint="text-gold" />
+            <StatCard icon={Trophy} label="Best Streak" value={`${stats.bestStreak}d`} tint="text-amber-400" />
+            <StatCard icon={FlaskConical} label="Mock Tests" value={stats.mockTests} tint="text-emerald-400" />
+            <StatCard icon={Clock} label="Practice" value={`${stats.practiceMinutes}m`} tint="text-sky-400" />
           </div>
         </section>
 
@@ -247,15 +228,33 @@ function ProfilePage() {
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Mock test history
           </h3>
-          <div className="rounded-2xl border border-border bg-card p-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-              <FlaskConical className="h-5 w-5 text-primary" />
+          {mockTests.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-card p-6 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                <FlaskConical className="h-5 w-5 text-primary" />
+              </div>
+              <p className="mt-3 text-sm font-medium text-foreground">No mock tests yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Take your first mock test to see performance history here.
+              </p>
             </div>
-            <p className="mt-3 text-sm font-medium text-foreground">No mock tests yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Take your first mock test to see performance history here.
-            </p>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              {mockTests.map((m) => (
+                <div key={m.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{m.test_name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {new Date(m.taken_at).toLocaleDateString()} · {m.score}/{m.total_questions} · {Math.round(m.time_taken_seconds / 60)}m
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-primary/15 px-2.5 py-1 text-xs font-bold text-primary">
+                    {Math.round(Number(m.percentage))}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Premium */}
