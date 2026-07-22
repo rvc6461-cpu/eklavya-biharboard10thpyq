@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { useCloudSync } from "../hooks/useCloudSync";
 
 function NotFoundComponent() {
   return (
@@ -127,8 +128,6 @@ function RootComponent() {
 }
 
 function CloudSyncGate() {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { useCloudSync } = require("@/hooks/useCloudSync") as typeof import("@/hooks/useCloudSync");
   useCloudSync();
   return null;
 }
