@@ -13,9 +13,13 @@ import {
   TrendingUp,
   CalendarDays,
   Check,
+  Flame,
+  Clock,
+  Trophy,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useProfile } from "@/hooks/useAuth";
+import { useLiveStats, useMockTests } from "@/hooks/useLiveStats";
 
 export const Route = createFileRoute("/profile")({
   ssr: false,
@@ -39,7 +43,8 @@ function ProfilePage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { profile, updateProfile } = useProfile(user);
-  const [stats, setStats] = useState<Stats>({ attempts: 0, correct: 0, bookmarks: 0, mistakes: 0 });
+  const { stats } = useLiveStats(user);
+  const mockTests = useMockTests(user);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [year, setYear] = useState<string>("");
@@ -48,28 +53,6 @@ function ProfilePage() {
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", search: { next: "/profile" } });
   }, [loading, user, navigate]);
-
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const [a, ac, b, m] = await Promise.all([
-        supabase.from("attempts").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase
-          .from("attempts")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", user.id)
-          .eq("is_correct", true),
-        supabase.from("bookmarks").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("mistakes").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-      ]);
-      setStats({
-        attempts: a.count ?? 0,
-        correct: ac.count ?? 0,
-        bookmarks: b.count ?? 0,
-        mistakes: m.count ?? 0,
-      });
-    })();
-  }, [user]);
 
   useEffect(() => {
     if (profile) {
@@ -92,7 +75,7 @@ function ProfilePage() {
     ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })
     : "—";
 
-  const accuracy = stats.attempts > 0 ? Math.round((stats.correct / stats.attempts) * 100) : 0;
+  const accuracy = stats.accuracy;
 
   async function saveProfile() {
     setSaving(true);
