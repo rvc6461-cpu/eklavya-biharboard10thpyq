@@ -1,11 +1,12 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft, Bookmark, BookmarkCheck, Check, X, ChevronRight,
   RotateCcw, Trophy, Lightbulb, Shuffle,
 } from "lucide-react";
 import { getChapter, type Question } from "@/lib/pyq/data";
 import { usePyqStore } from "@/lib/pyq/store";
+import { getPracticeSession, upsertPracticeSession } from "@/lib/pyq/cloud";
 
 export const Route = createFileRoute("/practice/$subject/$chapter")({
   loader: ({ params }) => {
@@ -55,6 +56,22 @@ function PracticeSession() {
 
   const total = order.length;
   const question = chapter.questions[order[idx]];
+
+  // Resume from cloud on first mount (best-effort). No-op when signed out.
+  useEffect(() => {
+    let cancelled = false;
+    getPracticeSession(subject.id, chapter.id).then((last) => {
+      if (cancelled || last == null) return;
+      if (last > 0 && last < total) setIdx(last);
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subject.id, chapter.id]);
+
+  // Persist current index to cloud as the user progresses.
+  useEffect(() => {
+    void upsertPracticeSession(subject.id, chapter.id, idx);
+  }, [subject.id, chapter.id, idx]);
 
   const resetSession = (reshuffle = false) => {
     setIdx(0); setSelected(null); setRevealed(false);
