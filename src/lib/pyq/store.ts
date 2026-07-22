@@ -2,6 +2,7 @@
 // Tracks attempts, bookmarks, and the mistake notebook.
 
 import { useEffect, useState, useCallback } from "react";
+import { pushAttempt, pushBookmark } from "./cloud";
 
 const KEY = "eklavya:pyq:v1";
 
@@ -70,15 +71,18 @@ export function usePyqStore() {
       next.mistakes = next.mistakes.filter((id) => id !== a.questionId);
     write(next);
     setState(next); // instant local update — don't wait for the event round-trip
+    pushAttempt(a); // fire-and-forget cloud sync (no-op if signed out)
   }, []);
 
   const toggleBookmark = useCallback((questionId: string) => {
     const next = read();
-    next.bookmarks = next.bookmarks.includes(questionId)
-      ? next.bookmarks.filter((id) => id !== questionId)
-      : [...next.bookmarks, questionId];
+    const on = !next.bookmarks.includes(questionId);
+    next.bookmarks = on
+      ? [...next.bookmarks, questionId]
+      : next.bookmarks.filter((id) => id !== questionId);
     write(next);
     setState(next); // instant local update
+    pushBookmark(questionId, on);
   }, []);
 
   return { state, recordAttempt, toggleBookmark };
