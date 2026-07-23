@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { ShieldAlert, Loader2 } from "lucide-react";
 
