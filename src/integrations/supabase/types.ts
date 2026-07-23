@@ -77,6 +77,47 @@ export type Database = {
         }
         Relationships: []
       }
+      chapters: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          subject_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          subject_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          subject_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapters_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mistakes: {
         Row: {
           chapter_id: string
@@ -112,6 +153,83 @@ export type Database = {
           wrong_count?: number
         }
         Relationships: []
+      }
+      mock_test_questions: {
+        Row: {
+          position: number
+          question_id: string
+          template_id: string
+        }
+        Insert: {
+          position?: number
+          question_id: string
+          template_id: string
+        }
+        Update: {
+          position?: number
+          question_id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_test_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mock_test_questions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "mock_test_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_test_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_published: boolean
+          name: string
+          subject_id: string | null
+          time_limit_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          name: string
+          subject_id?: string | null
+          time_limit_seconds?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          name?: string
+          subject_id?: string | null
+          time_limit_seconds?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_test_templates_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mock_tests: {
         Row: {
@@ -152,6 +270,99 @@ export type Database = {
           time_taken_seconds?: number
           total_questions?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          chapter_id: string | null
+          created_at: string
+          description: string | null
+          download_count: number
+          id: string
+          is_premium: boolean
+          is_published: boolean
+          pdf_url: string
+          subject_id: string | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          chapter_id?: string | null
+          created_at?: string
+          description?: string | null
+          download_count?: number
+          id?: string
+          is_premium?: boolean
+          is_published?: boolean
+          pdf_url: string
+          subject_id?: string | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          chapter_id?: string | null
+          created_at?: string
+          description?: string | null
+          download_count?: number
+          id?: string
+          is_premium?: boolean
+          is_published?: boolean
+          pdf_url?: string
+          subject_id?: string | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          scheduled_for: string | null
+          sent_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -224,6 +435,126 @@ export type Database = {
         }
         Relationships: []
       }
+      questions: {
+        Row: {
+          chapter_id: string
+          correct_answer: number
+          created_at: string
+          created_by: string | null
+          difficulty: Database["public"]["Enums"]["question_difficulty"]
+          explanation: string | null
+          id: string
+          is_pyq: boolean
+          legacy_id: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          status: Database["public"]["Enums"]["question_status"]
+          subject_id: string
+          tags: string[]
+          text: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          chapter_id: string
+          correct_answer: number
+          created_at?: string
+          created_by?: string | null
+          difficulty?: Database["public"]["Enums"]["question_difficulty"]
+          explanation?: string | null
+          id?: string
+          is_pyq?: boolean
+          legacy_id?: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          status?: Database["public"]["Enums"]["question_status"]
+          subject_id: string
+          tags?: string[]
+          text: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          chapter_id?: string
+          correct_answer?: number
+          created_at?: string
+          created_by?: string | null
+          difficulty?: Database["public"]["Enums"]["question_difficulty"]
+          explanation?: string | null
+          id?: string
+          is_pyq?: boolean
+          legacy_id?: string | null
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          status?: Database["public"]["Enums"]["question_status"]
+          subject_id?: string
+          tags?: string[]
+          text?: string
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          created_at: string
+          glyph: string
+          hue: string
+          id: string
+          is_active: boolean
+          name: string
+          short: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          glyph?: string
+          hue?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          short: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          glyph?: string
+          hue?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          short?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -257,9 +588,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      question_difficulty: "easy" | "medium" | "hard"
+      question_status: "draft" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -388,6 +723,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      question_difficulty: ["easy", "medium", "hard"],
+      question_status: ["draft", "published"],
     },
   },
 } as const

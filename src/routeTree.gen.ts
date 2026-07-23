@@ -17,8 +17,17 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PracticeSubjectRouteImport } from './routes/practice.$subject'
+import { Route as AdminSubjectsRouteImport } from './routes/admin.subjects'
+import { Route as AdminQuestionsRouteImport } from './routes/admin.questions'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminNotesRouteImport } from './routes/admin.notes'
+import { Route as AdminMockTestsRouteImport } from './routes/admin.mock-tests'
+import { Route as AdminChaptersRouteImport } from './routes/admin.chapters'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as PracticeSubjectChapterRouteImport } from './routes/practice.$subject.$chapter'
@@ -65,15 +74,60 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const PracticeSubjectRoute = PracticeSubjectRouteImport.update({
   id: '/$subject',
   path: '/$subject',
   getParentRoute: () => PracticeRoute,
+} as any)
+const AdminSubjectsRoute = AdminSubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminQuestionsRoute = AdminQuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotesRoute = AdminNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMockTestsRoute = AdminMockTestsRouteImport.update({
+  id: '/mock-tests',
+  path: '/mock-tests',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChaptersRoute = AdminChaptersRouteImport.update({
+  id: '/chapters',
+  path: '/chapters',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
 } as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
@@ -106,6 +160,7 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/bookmarks': typeof BookmarksRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -116,7 +171,15 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/chapters': typeof AdminChaptersRoute
+  '/admin/mock-tests': typeof AdminMockTestsRoute
+  '/admin/notes': typeof AdminNotesRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/subjects': typeof AdminSubjectsRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
@@ -133,7 +196,15 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/chapters': typeof AdminChaptersRoute
+  '/admin/mock-tests': typeof AdminMockTestsRoute
+  '/admin/notes': typeof AdminNotesRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/subjects': typeof AdminSubjectsRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
+  '/admin': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
@@ -141,6 +212,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/bookmarks': typeof BookmarksRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -151,7 +223,15 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/chapters': typeof AdminChaptersRoute
+  '/admin/mock-tests': typeof AdminMockTestsRoute
+  '/admin/notes': typeof AdminNotesRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/subjects': typeof AdminSubjectsRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
@@ -160,6 +240,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/bookmarks'
     | '/forgot-password'
@@ -170,7 +251,15 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/analytics'
+    | '/admin/chapters'
+    | '/admin/mock-tests'
+    | '/admin/notes'
+    | '/admin/notifications'
+    | '/admin/questions'
+    | '/admin/subjects'
     | '/practice/$subject'
+    | '/admin/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/practice/$subject/$chapter'
@@ -187,13 +276,22 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/analytics'
+    | '/admin/chapters'
+    | '/admin/mock-tests'
+    | '/admin/notes'
+    | '/admin/notifications'
+    | '/admin/questions'
+    | '/admin/subjects'
     | '/practice/$subject'
+    | '/admin'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/practice/$subject/$chapter'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/auth'
     | '/bookmarks'
     | '/forgot-password'
@@ -204,7 +302,15 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/analytics'
+    | '/admin/chapters'
+    | '/admin/mock-tests'
+    | '/admin/notes'
+    | '/admin/notifications'
+    | '/admin/questions'
+    | '/admin/subjects'
     | '/practice/$subject'
+    | '/admin/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/practice/$subject/$chapter'
@@ -212,6 +318,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   BookmarksRoute: typeof BookmarksRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -284,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -291,12 +405,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/practice/$subject': {
       id: '/practice/$subject'
       path: '/$subject'
       fullPath: '/practice/$subject'
       preLoaderRoute: typeof PracticeSubjectRouteImport
       parentRoute: typeof PracticeRoute
+    }
+    '/admin/subjects': {
+      id: '/admin/subjects'
+      path: '/subjects'
+      fullPath: '/admin/subjects'
+      preLoaderRoute: typeof AdminSubjectsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/questions': {
+      id: '/admin/questions'
+      path: '/questions'
+      fullPath: '/admin/questions'
+      preLoaderRoute: typeof AdminQuestionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notes': {
+      id: '/admin/notes'
+      path: '/notes'
+      fullPath: '/admin/notes'
+      preLoaderRoute: typeof AdminNotesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/mock-tests': {
+      id: '/admin/mock-tests'
+      path: '/mock-tests'
+      fullPath: '/admin/mock-tests'
+      preLoaderRoute: typeof AdminMockTestsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chapters': {
+      id: '/admin/chapters'
+      path: '/chapters'
+      fullPath: '/admin/chapters'
+      preLoaderRoute: typeof AdminChaptersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
@@ -336,6 +506,30 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminChaptersRoute: typeof AdminChaptersRoute
+  AdminMockTestsRoute: typeof AdminMockTestsRoute
+  AdminNotesRoute: typeof AdminNotesRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminQuestionsRoute: typeof AdminQuestionsRoute
+  AdminSubjectsRoute: typeof AdminSubjectsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminChaptersRoute: AdminChaptersRoute,
+  AdminMockTestsRoute: AdminMockTestsRoute,
+  AdminNotesRoute: AdminNotesRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminQuestionsRoute: AdminQuestionsRoute,
+  AdminSubjectsRoute: AdminSubjectsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface PracticeSubjectRouteChildren {
   PracticeSubjectChapterRoute: typeof PracticeSubjectChapterRoute
 }
@@ -362,6 +556,7 @@ const PracticeRouteWithChildren = PracticeRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   BookmarksRoute: BookmarksRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
