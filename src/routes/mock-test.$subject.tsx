@@ -4,7 +4,7 @@ import {
   ArrowLeft, ChevronLeft, ChevronRight, Flag, Check, X, Timer,
   Trophy, RotateCcw, AlertTriangle,
 } from "lucide-react";
-import { getSubject, type Question } from "@/lib/pyq/data";
+import { getSubject, type Question, type Chapter } from "@/lib/pyq/data";
 import { usePyqStore } from "@/lib/pyq/store";
 import { saveMockTest } from "@/lib/pyq/cloud";
 
@@ -48,8 +48,8 @@ function MockTestRunner() {
 
   const pool: QuizQ[] = useMemo(
     () =>
-      subject.chapters.flatMap((c) =>
-        c.questions.map((q) => ({ ...q, chapterId: c.id, chapterName: c.name })),
+      subject.chapters.flatMap((c: Chapter) =>
+        c.questions.map((q: Question) => ({ ...q, chapterId: c.id, chapterName: c.name })),
       ),
     [subject],
   );
