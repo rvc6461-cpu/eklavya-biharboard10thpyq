@@ -264,3 +264,39 @@ export function getChapter(subjectId: string, chapterId: string) {
   const chapter = subject?.chapters.find((c) => c.id === chapterId);
   return { subject, chapter };
 }
+
+/**
+ * Split a chapter's questions into practice sets of ~20 questions each.
+ * Fills sets of 20 sequentially; the final set holds the leftover
+ * (typically 15–20; may be smaller when the chapter has very few PYQs).
+ */
+export function buildPracticeSets(questions: Question[], setSize = 20): Question[][] {
+  if (!questions.length) return [];
+  const sets: Question[][] = [];
+  for (let i = 0; i < questions.length; i += setSize) {
+    sets.push(questions.slice(i, i + setSize));
+  }
+  return sets;
+}
+
+const BEST_SCORE_KEY = "eklavya:pyq:setBest:v1";
+
+export function readSetBestScores(): Record<string, number> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(window.localStorage.getItem(BEST_SCORE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+export function writeSetBestScore(key: string, pct: number) {
+  if (typeof window === "undefined") return;
+  const all = readSetBestScores();
+  if ((all[key] ?? -1) < pct) {
+    all[key] = pct;
+    window.localStorage.setItem(BEST_SCORE_KEY, JSON.stringify(all));
+    window.dispatchEvent(new CustomEvent("eklavya:pyq:update"));
+  }
+}
+

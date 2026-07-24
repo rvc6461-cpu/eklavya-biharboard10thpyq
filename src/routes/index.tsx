@@ -250,7 +250,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
 type Tool = { icon: LucideIcon; label: string; sub: string; tint: string; bg: string; to?: string };
 const TOOLS: Tool[] = [
   { icon: BookOpen, label: "PYQ Practice", sub: "Chapter-wise · Offline", tint: "text-indigo-300", bg: "bg-indigo-500/15", to: "/practice" },
-  { icon: FlaskConical, label: "Mock Test", sub: "Full length · Live", tint: "text-emerald-300", bg: "bg-emerald-500/15" },
+  { icon: FlaskConical, label: "Mock Test", sub: "Full length · Live", tint: "text-emerald-300", bg: "bg-emerald-500/15", to: "/mock-test" },
   { icon: FileText, label: "PYQ Papers", sub: "PDF library", tint: "text-sky-300", bg: "bg-sky-500/15" },
   { icon: Sparkles, label: "Formula Sheet", sub: "Quick revision", tint: "text-amber-300", bg: "bg-amber-500/15" },
   { icon: NotebookPen, label: "Mistake Book", sub: "Learn from errors", tint: "text-rose-300", bg: "bg-rose-500/15", to: "/mistakes" },

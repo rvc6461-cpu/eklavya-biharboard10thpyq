@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PracticeRouteImport } from './routes/practice'
+import { Route as MockTestRouteImport } from './routes/mock-test'
 import { Route as MistakesRouteImport } from './routes/mistakes'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -21,6 +22,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PracticeSubjectRouteImport } from './routes/practice.$subject'
+import { Route as MockTestSubjectRouteImport } from './routes/mock-test.$subject'
 import { Route as AdminSubjectsRouteImport } from './routes/admin.subjects'
 import { Route as AdminQuestionsRouteImport } from './routes/admin.questions'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
@@ -33,6 +35,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as PracticeSubjectChapterRouteImport } from './routes/practice.$subject.$chapter'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as PracticeSubjectChapterSetRouteImport } from './routes/practice.$subject.$chapter.$set'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -47,6 +50,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const PracticeRoute = PracticeRouteImport.update({
   id: '/practice',
   path: '/practice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MockTestRoute = MockTestRouteImport.update({
+  id: '/mock-test',
+  path: '/mock-test',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MistakesRoute = MistakesRouteImport.update({
@@ -93,6 +101,11 @@ const PracticeSubjectRoute = PracticeSubjectRouteImport.update({
   id: '/$subject',
   path: '/$subject',
   getParentRoute: () => PracticeRoute,
+} as any)
+const MockTestSubjectRoute = MockTestSubjectRouteImport.update({
+  id: '/$subject',
+  path: '/$subject',
+  getParentRoute: () => MockTestRoute,
 } as any)
 const AdminSubjectsRoute = AdminSubjectsRouteImport.update({
   id: '/subjects',
@@ -157,6 +170,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PracticeSubjectChapterSetRoute =
+  PracticeSubjectChapterSetRouteImport.update({
+    id: '/$set',
+    path: '/$set',
+    getParentRoute: () => PracticeSubjectChapterRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -166,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/mcp': typeof McpRoute
   '/mistakes': typeof MistakesRoute
+  '/mock-test': typeof MockTestRouteWithChildren
   '/practice': typeof PracticeRouteWithChildren
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -178,11 +198,13 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
+  '/mock-test/$subject': typeof MockTestSubjectRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
-  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
+  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
+  '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -191,6 +213,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/mcp': typeof McpRoute
   '/mistakes': typeof MistakesRoute
+  '/mock-test': typeof MockTestRouteWithChildren
   '/practice': typeof PracticeRouteWithChildren
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -203,11 +226,13 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
+  '/mock-test/$subject': typeof MockTestSubjectRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
-  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
+  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
+  '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -218,6 +243,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/mcp': typeof McpRoute
   '/mistakes': typeof MistakesRoute
+  '/mock-test': typeof MockTestRouteWithChildren
   '/practice': typeof PracticeRouteWithChildren
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -230,11 +256,13 @@ export interface FileRoutesById {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
+  '/mock-test/$subject': typeof MockTestSubjectRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
-  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRoute
+  '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
+  '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -246,6 +274,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/mcp'
     | '/mistakes'
+    | '/mock-test'
     | '/practice'
     | '/profile'
     | '/reset-password'
@@ -258,11 +287,13 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/questions'
     | '/admin/subjects'
+    | '/mock-test/$subject'
     | '/practice/$subject'
     | '/admin/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/practice/$subject/$chapter'
+    | '/practice/$subject/$chapter/$set'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -271,6 +302,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/mcp'
     | '/mistakes'
+    | '/mock-test'
     | '/practice'
     | '/profile'
     | '/reset-password'
@@ -283,11 +315,13 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/questions'
     | '/admin/subjects'
+    | '/mock-test/$subject'
     | '/practice/$subject'
     | '/admin'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/practice/$subject/$chapter'
+    | '/practice/$subject/$chapter/$set'
   id:
     | '__root__'
     | '/'
@@ -297,6 +331,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/mcp'
     | '/mistakes'
+    | '/mock-test'
     | '/practice'
     | '/profile'
     | '/reset-password'
@@ -309,11 +344,13 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/questions'
     | '/admin/subjects'
+    | '/mock-test/$subject'
     | '/practice/$subject'
     | '/admin/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/practice/$subject/$chapter'
+    | '/practice/$subject/$chapter/$set'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -324,6 +361,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   McpRoute: typeof McpRoute
   MistakesRoute: typeof MistakesRoute
+  MockTestRoute: typeof MockTestRouteWithChildren
   PracticeRoute: typeof PracticeRouteWithChildren
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -354,6 +392,13 @@ declare module '@tanstack/react-router' {
       path: '/practice'
       fullPath: '/practice'
       preLoaderRoute: typeof PracticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mock-test': {
+      id: '/mock-test'
+      path: '/mock-test'
+      fullPath: '/mock-test'
+      preLoaderRoute: typeof MockTestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mistakes': {
@@ -418,6 +463,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/practice/$subject'
       preLoaderRoute: typeof PracticeSubjectRouteImport
       parentRoute: typeof PracticeRoute
+    }
+    '/mock-test/$subject': {
+      id: '/mock-test/$subject'
+      path: '/$subject'
+      fullPath: '/mock-test/$subject'
+      preLoaderRoute: typeof MockTestSubjectRouteImport
+      parentRoute: typeof MockTestRoute
     }
     '/admin/subjects': {
       id: '/admin/subjects'
@@ -503,6 +555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/practice/$subject/$chapter/$set': {
+      id: '/practice/$subject/$chapter/$set'
+      path: '/$set'
+      fullPath: '/practice/$subject/$chapter/$set'
+      preLoaderRoute: typeof PracticeSubjectChapterSetRouteImport
+      parentRoute: typeof PracticeSubjectChapterRoute
+    }
   }
 }
 
@@ -530,12 +589,38 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface MockTestRouteChildren {
+  MockTestSubjectRoute: typeof MockTestSubjectRoute
+}
+
+const MockTestRouteChildren: MockTestRouteChildren = {
+  MockTestSubjectRoute: MockTestSubjectRoute,
+}
+
+const MockTestRouteWithChildren = MockTestRoute._addFileChildren(
+  MockTestRouteChildren,
+)
+
+interface PracticeSubjectChapterRouteChildren {
+  PracticeSubjectChapterSetRoute: typeof PracticeSubjectChapterSetRoute
+}
+
+const PracticeSubjectChapterRouteChildren: PracticeSubjectChapterRouteChildren =
+  {
+    PracticeSubjectChapterSetRoute: PracticeSubjectChapterSetRoute,
+  }
+
+const PracticeSubjectChapterRouteWithChildren =
+  PracticeSubjectChapterRoute._addFileChildren(
+    PracticeSubjectChapterRouteChildren,
+  )
+
 interface PracticeSubjectRouteChildren {
-  PracticeSubjectChapterRoute: typeof PracticeSubjectChapterRoute
+  PracticeSubjectChapterRoute: typeof PracticeSubjectChapterRouteWithChildren
 }
 
 const PracticeSubjectRouteChildren: PracticeSubjectRouteChildren = {
-  PracticeSubjectChapterRoute: PracticeSubjectChapterRoute,
+  PracticeSubjectChapterRoute: PracticeSubjectChapterRouteWithChildren,
 }
 
 const PracticeSubjectRouteWithChildren = PracticeSubjectRoute._addFileChildren(
@@ -562,6 +647,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   McpRoute: McpRoute,
   MistakesRoute: MistakesRoute,
+  MockTestRoute: MockTestRouteWithChildren,
   PracticeRoute: PracticeRouteWithChildren,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
