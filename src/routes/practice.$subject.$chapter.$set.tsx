@@ -4,14 +4,18 @@ import {
   ArrowLeft, Bookmark, BookmarkCheck, Check, X, ChevronRight,
   RotateCcw, Trophy, Lightbulb, Shuffle,
 } from "lucide-react";
-import { getChapter, buildPracticeSets, writeSetBestScore, type Question } from "@/lib/pyq/data";
+import { buildPracticeSets, writeSetBestScore, type Question } from "@/lib/pyq/data";
+import { fetchSubjectBySlugOrId, fetchChapterBySlugOrId, fetchChapterQuestions } from "@/lib/pyq/db";
 import { usePyqStore } from "@/lib/pyq/store";
 
 export const Route = createFileRoute("/practice/$subject/$chapter/$set")({
-  loader: ({ params }) => {
-    const { subject, chapter } = getChapter(params.subject, params.chapter);
-    if (!subject || !chapter) throw notFound();
-    const sets = buildPracticeSets(chapter.questions);
+  loader: async ({ params }) => {
+    const subject = await fetchSubjectBySlugOrId(params.subject);
+    if (!subject) throw notFound();
+    const chapter = await fetchChapterBySlugOrId(subject.id, params.chapter);
+    if (!chapter) throw notFound();
+    const questions = await fetchChapterQuestions(chapter.id);
+    const sets = buildPracticeSets(questions);
     const setIndex = Number(params.set) - 1;
     if (!Number.isInteger(setIndex) || setIndex < 0 || setIndex >= sets.length) throw notFound();
     return { subject, chapter, questions: sets[setIndex], setNumber: setIndex + 1, totalSets: sets.length };
