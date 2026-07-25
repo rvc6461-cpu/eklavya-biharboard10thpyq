@@ -85,6 +85,7 @@ export type Database = {
           name: string
           slug: string
           sort_order: number
+          sub_subject_id: string | null
           subject_id: string
           updated_at: string
         }
@@ -95,6 +96,7 @@ export type Database = {
           name: string
           slug: string
           sort_order?: number
+          sub_subject_id?: string | null
           subject_id: string
           updated_at?: string
         }
@@ -105,10 +107,18 @@ export type Database = {
           name?: string
           slug?: string
           sort_order?: number
+          sub_subject_id?: string | null
           subject_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "chapters_sub_subject_id_fkey"
+            columns: ["sub_subject_id"]
+            isOneToOne: false
+            referencedRelation: "sub_subjects"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chapters_subject_id_fkey"
             columns: ["subject_id"]
@@ -445,6 +455,7 @@ export type Database = {
           explanation: string | null
           id: string
           is_pyq: boolean
+          language: string | null
           legacy_id: string | null
           option_a: string
           option_b: string
@@ -466,6 +477,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           is_pyq?: boolean
+          language?: string | null
           legacy_id?: string | null
           option_a: string
           option_b: string
@@ -487,6 +499,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           is_pyq?: boolean
+          language?: string | null
           legacy_id?: string | null
           option_a?: string
           option_b?: string
@@ -509,6 +522,47 @@ export type Database = {
           },
           {
             foreignKeyName: "questions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sub_subjects: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number
+          subject_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number
+          subject_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number
+          subject_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_subjects_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"

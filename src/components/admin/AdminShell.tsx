@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
-  LayoutDashboard, BookOpen, Layers, ListChecks, ClipboardList,
+  LayoutDashboard, BookOpen, FolderTree, Layers, ListChecks, ClipboardList,
   FileText, Bell, BarChart3, Menu, X, LogOut,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/subjects", label: "Subjects", icon: BookOpen },
+  { to: "/admin/sub-subjects", label: "Sub Subjects", icon: FolderTree },
   { to: "/admin/chapters", label: "Chapters", icon: Layers },
   { to: "/admin/questions", label: "Questions", icon: ListChecks },
   { to: "/admin/mock-tests", label: "Mock Tests", icon: ClipboardList },
