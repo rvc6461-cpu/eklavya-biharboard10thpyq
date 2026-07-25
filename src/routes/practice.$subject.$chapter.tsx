@@ -1,14 +1,21 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, CheckCircle2, Trophy, ListChecks } from "lucide-react";
-import { getChapter, buildPracticeSets, readSetBestScores, type Question } from "@/lib/pyq/data";
-import { usePyqStore } from "@/lib/pyq/store";
+import { ArrowLeft, ChevronRight, CheckCircle2, Trophy, ListChecks, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { buildPracticeSets, readSetBestScores, type Question } from "@/lib/pyq/data";
+import {
+  fetchSubjectBySlugOrId, fetchChapterBySlugOrId, fetchChapterQuestions,
+  type DbSubject, type DbChapter,
+} from "@/lib/pyq/db";
+import { usePyqStore } from "@/lib/pyq/store";
 
 export const Route = createFileRoute("/practice/$subject/$chapter")({
-  loader: ({ params }) => {
-    const { subject, chapter } = getChapter(params.subject, params.chapter);
-    if (!subject || !chapter) throw notFound();
-    return { subject, chapter };
+  loader: async ({ params }) => {
+    const subject = await fetchSubjectBySlugOrId(params.subject);
+    if (!subject) throw notFound();
+    const chapter = await fetchChapterBySlugOrId(subject.id, params.chapter);
+    if (!chapter) throw notFound();
+    const questions = await fetchChapterQuestions(chapter.id);
+    return { subject, chapter, questions };
   },
   head: ({ loaderData }) => ({
     meta: [
@@ -17,12 +24,21 @@ export const Route = createFileRoute("/practice/$subject/$chapter")({
     ],
   }),
   errorComponent: () => <div className="p-6 text-center">Something went wrong.</div>,
-  notFoundComponent: () => <div className="p-6 text-center">Chapter not found.</div>,
+  notFoundComponent: () => (
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground p-6 text-center">
+      <div>
+        <p className="font-display text-lg font-bold">Chapter not found</p>
+        <Link to="/practice" className="mt-3 inline-block text-primary text-sm">← Back to subjects</Link>
+      </div>
+    </div>
+  ),
   component: ChapterSetsPage,
 });
 
 function ChapterSetsPage() {
-  const { subject, chapter } = Route.useLoaderData();
+  const { subject, chapter, questions } = Route.useLoaderData() as {
+    subject: DbSubject; chapter: DbChapter; questions: Question[];
+  };
   const { state } = usePyqStore();
   const [best, setBest] = useState<Record<string, number>>({});
 
@@ -37,7 +53,7 @@ function ChapterSetsPage() {
     };
   }, []);
 
-  const sets = buildPracticeSets(chapter.questions);
+  const sets = buildPracticeSets(questions);
 
   return (
     <div className="min-h-screen bg-background pb-16 text-foreground">
@@ -45,7 +61,7 @@ function ChapterSetsPage() {
         <header className="flex items-center justify-between px-5 pt-6 pb-4">
           <Link
             to="/practice/$subject"
-            params={{ subject: subject.id }}
+            params={{ subject: subject.slug }}
             className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -84,7 +100,7 @@ function ChapterSetsPage() {
                 <Link
                   key={setKey}
                   to="/practice/$subject/$chapter/$set"
-                  params={{ subject: subject.id, chapter: chapter.id, set: String(i + 1) }}
+                  params={{ subject: subject.slug, chapter: chapter.slug, set: String(i + 1) }}
                   className="bg-gradient-card block rounded-2xl border border-border p-4"
                 >
                   <div className="flex items-center gap-3">

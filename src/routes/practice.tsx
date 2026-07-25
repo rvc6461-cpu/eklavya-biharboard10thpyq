@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, Bookmark, NotebookPen, ChevronRight } from "lucide-react";
-import { SUBJECTS } from "@/lib/pyq/data";
+import { ArrowLeft, BookOpen, Bookmark, NotebookPen, ChevronRight, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { usePyqStore } from "@/lib/pyq/store";
+import { fetchSubjects, type DbSubject } from "@/lib/pyq/db";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/practice")({
   head: () => ({
@@ -15,6 +17,26 @@ export const Route = createFileRoute("/practice")({
 
 function PracticeIndex() {
   const { state } = usePyqStore();
+  const [subjects, setSubjects] = useState<DbSubject[] | null>(null);
+  const [counts, setCounts] = useState<Record<string, { chapters: number; questions: number }>>({});
+
+  useEffect(() => {
+    (async () => {
+      const subs = await fetchSubjects();
+      setSubjects(subs);
+      if (!subs.length) { setCounts({}); return; }
+      const ids = subs.map((s) => s.id);
+      const [{ data: chaps }, { data: qs }] = await Promise.all([
+        supabase.from("chapters").select("id,subject_id").in("subject_id", ids).eq("is_active", true),
+        supabase.from("questions").select("id,subject_id").in("subject_id", ids).eq("status", "published"),
+      ]);
+      const map: Record<string, { chapters: number; questions: number }> = {};
+      for (const s of subs) map[s.id] = { chapters: 0, questions: 0 };
+      for (const c of chaps ?? []) map[c.subject_id] && map[c.subject_id].chapters++;
+      for (const q of qs ?? []) map[q.subject_id] && map[q.subject_id].questions++;
+      setCounts(map);
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-16 text-foreground">
@@ -61,31 +83,51 @@ function PracticeIndex() {
 
           <div className="space-y-3">
             <h3 className="font-display text-base font-bold">Subjects</h3>
-            {SUBJECTS.map((s) => {
-              const total = s.chapters.reduce((n, c) => n + c.questions.length, 0);
-              return (
-                <Link
-                  key={s.id}
-                  to="/practice/$subject"
-                  params={{ subject: s.id }}
-                  className="bg-gradient-card flex items-center gap-4 rounded-2xl border border-border p-4"
-                >
-                  <div className={`bg-gradient-to-br ${s.hue} flex h-12 w-12 items-center justify-center rounded-2xl font-display text-xl font-bold text-white shadow-lg`}>
-                    {s.glyph}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display text-sm font-bold">{s.name}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {s.chapters.length} chapters · {total} questions
-                    </p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </Link>
-              );
-            })}
+            {subjects === null ? (
+              <div className="rounded-2xl border border-border bg-card p-8 text-center">
+                <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : subjects.length === 0 ? (
+              <EmptyState
+                title="No subjects yet"
+                message="Once an admin adds subjects, they'll appear here for practice."
+              />
+            ) : (
+              subjects.map((s) => {
+                const c = counts[s.id] ?? { chapters: 0, questions: 0 };
+                return (
+                  <Link
+                    key={s.id}
+                    to="/practice/$subject"
+                    params={{ subject: s.slug }}
+                    className="bg-gradient-card flex items-center gap-4 rounded-2xl border border-border p-4"
+                  >
+                    <div className={`bg-gradient-to-br ${s.hue} flex h-12 w-12 items-center justify-center rounded-2xl font-display text-xl font-bold text-white shadow-lg`}>
+                      {s.glyph}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display text-sm font-bold">{s.name}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {c.chapters} chapters · {c.questions} questions
+                      </p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </Link>
+                );
+              })
+            )}
           </div>
         </main>
       </div>
+    </div>
+  );
+}
+
+function EmptyState({ title, message }: { title: string; message: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
+      <p className="font-display text-sm font-bold">{title}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{message}</p>
     </div>
   );
 }

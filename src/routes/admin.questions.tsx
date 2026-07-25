@@ -12,9 +12,9 @@ export const Route = createFileRoute("/admin/questions")({
 type Q = {
   id?: string; subject_id: string; chapter_id: string; text: string;
   option_a: string; option_b: string; option_c: string; option_d: string;
-  correct_answer: number; difficulty: "easy"|"medium"|"hard";
+  correct_answer: number; difficulty: "easy" | "medium" | "hard";
   is_pyq: boolean; year: number | null; explanation: string | null;
-  tags: string[]; status: "draft"|"published";
+  tags: string[]; status: "draft" | "published"; language?: string | null;
 };
 
 const PAGE_SIZE = 20;
@@ -32,6 +32,7 @@ function QuestionsAdmin() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Partial<Q> | null>(null);
   const [importing, setImporting] = useState(false);
+  const [importSummary, setImportSummary] = useState<null | { imported: number; skipped: number; failed: number; details: string[] }>(null);
 
   useEffect(() => {
     supabase.from("subjects").select("*").order("sort_order").then(({ data }) => setSubjects(data ?? []));
@@ -65,6 +66,7 @@ function QuestionsAdmin() {
       correct_answer: editing.correct_answer ?? 0, difficulty: editing.difficulty ?? "medium",
       is_pyq: editing.is_pyq ?? false, year: editing.year || null, explanation: editing.explanation || null,
       tags: editing.tags ?? [], status: editing.status ?? "published",
+      language: editing.language || null,
     };
     if (!p.subject_id || !p.chapter_id || !p.text || !p.option_a || !p.option_b || !p.option_c || !p.option_d) {
       alert("Fill all required fields."); return;
@@ -82,35 +84,153 @@ function QuestionsAdmin() {
 
   const bulkImport = async (file: File) => {
     setImporting(true);
+    setImportSummary(null);
+    const details: string[] = [];
+    let imported = 0, skipped = 0, failed = 0;
     try {
       const text = await file.text();
-      const rows = parseCSV(text);
-      const header = rows[0].map((h) => h.trim().toLowerCase());
-      const idx = (k: string) => header.indexOf(k);
-      const need = ["subject_slug","chapter_slug","text","option_a","option_b","option_c","option_d","correct_answer"];
-      for (const k of need) if (idx(k) < 0) throw new Error(`Missing column: ${k}`);
-      const inserts: any[] = [];
+      const rows = parseCSV(text).filter((r) => r.some((c) => c.trim() !== ""));
+      if (!rows.length) throw new Error("Empty CSV.");
+      const header = rows[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
+      const idx = (...keys: string[]) => {
+        for (const k of keys) { const i = header.indexOf(k); if (i >= 0) return i; }
+        return -1;
+      };
+      const iSubject = idx("subject", "subject_name", "subject_slug");
+      const iSubSubject = idx("sub_subject", "sub-subject", "subsubject", "sub_subject_name", "sub_subject_slug");
+      const iChapter = idx("chapter", "chapter_name", "chapter_slug");
+      const iText = idx("question", "text");
+      const iA = idx("option_a", "a");
+      const iB = idx("option_b", "b");
+      const iC = idx("option_c", "c");
+      const iD = idx("option_d", "d");
+      const iAns = idx("correct_answer", "answer", "correct");
+      const iLang = idx("language", "lang");
+      const iDiff = idx("difficulty");
+      const iPyq = idx("is_pyq", "pyq");
+      const iYear = idx("year");
+      const iExpl = idx("explanation");
+      const iTags = idx("tags");
+      const iStatus = idx("status");
+
+      const required = { subject: iSubject, chapter: iChapter, question: iText, option_a: iA, option_b: iB, option_c: iC, option_d: iD, correct_answer: iAns };
+      const missing = Object.entries(required).filter(([, i]) => i < 0).map(([k]) => k);
+      if (missing.length) throw new Error("Missing columns: " + missing.join(", "));
+
+      // Cache subjects / sub-subjects / chapters
+      const [{ data: subjRows }, { data: ssRows }, { data: chapRows }] = await Promise.all([
+        supabase.from("subjects").select("id,name,slug"),
+        supabase.from("sub_subjects").select("id,name,slug,subject_id"),
+        supabase.from("chapters").select("id,name,slug,subject_id,sub_subject_id"),
+      ]);
+      const subjectsCache = [...(subjRows ?? [])] as any[];
+      const subSubjectsCache = [...(ssRows ?? [])] as any[];
+      const chaptersCache = [...(chapRows ?? [])] as any[];
+
+      const slugify = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "item";
+      const norm = (s: string) => s.trim().toLowerCase();
+
+      const findOrCreateSubject = async (raw: string) => {
+        const name = raw.trim(); if (!name) return null;
+        const slug = slugify(name);
+        let found = subjectsCache.find((s) => norm(s.name) === norm(name) || s.slug === slug);
+        if (found) return found;
+        const { data, error } = await supabase.from("subjects").insert({
+          slug, name, short: name.slice(0, 4), glyph: "★", hue: "from-indigo-500 to-violet-600",
+          sort_order: subjectsCache.length, is_active: true,
+        }).select("id,name,slug").single();
+        if (error || !data) throw new Error(`Subject "${name}": ${error?.message || "insert failed"}`);
+        subjectsCache.push(data);
+        return data;
+      };
+
+      const findOrCreateSubSubject = async (subject: any, raw: string) => {
+        const name = raw.trim(); if (!name) return null;
+        const slug = slugify(name);
+        let found = subSubjectsCache.find((s) => s.subject_id === subject.id && (norm(s.name) === norm(name) || s.slug === slug));
+        if (found) return found;
+        const { data, error } = await supabase.from("sub_subjects").insert({
+          subject_id: subject.id, slug, name,
+          sort_order: subSubjectsCache.filter((s) => s.subject_id === subject.id).length,
+          is_active: true,
+        }).select("id,name,slug,subject_id").single();
+        if (error || !data) throw new Error(`Sub subject "${name}": ${error?.message || "insert failed"}`);
+        subSubjectsCache.push(data);
+        return data;
+      };
+
+      const findOrCreateChapter = async (subject: any, subSubject: any | null, raw: string) => {
+        const name = raw.trim(); if (!name) return null;
+        const slug = slugify(name);
+        let found = chaptersCache.find((c) => c.subject_id === subject.id && (norm(c.name) === norm(name) || c.slug === slug));
+        if (found) {
+          if (subSubject && !found.sub_subject_id) {
+            await supabase.from("chapters").update({ sub_subject_id: subSubject.id }).eq("id", found.id);
+            found.sub_subject_id = subSubject.id;
+          }
+          return found;
+        }
+        const { data, error } = await supabase.from("chapters").insert({
+          subject_id: subject.id, sub_subject_id: subSubject?.id ?? null, slug, name,
+          sort_order: chaptersCache.filter((c) => c.subject_id === subject.id).length,
+          is_active: true,
+        }).select("id,name,slug,subject_id,sub_subject_id").single();
+        if (error || !data) throw new Error(`Chapter "${name}": ${error?.message || "insert failed"}`);
+        chaptersCache.push(data);
+        return data;
+      };
+
+      const parseCorrect = (raw: string): number => {
+        const t = raw.trim().toLowerCase();
+        if (["0", "1", "2", "3"].includes(t)) return Number(t);
+        if (["a", "b", "c", "d"].includes(t)) return "abcd".indexOf(t);
+        return -1;
+      };
+
       for (let i = 1; i < rows.length; i++) {
-        const r = rows[i]; if (!r || r.length < need.length || !r[idx("text")]) continue;
-        const subj = subjects.find((s) => s.slug === r[idx("subject_slug")]);
-        const chap = chapters.find((c) => c.slug === r[idx("chapter_slug")] && (!subj || c.subject_id === subj.id));
-        if (!subj || !chap) continue;
-        inserts.push({
-          subject_id: subj.id, chapter_id: chap.id, text: r[idx("text")],
-          option_a: r[idx("option_a")], option_b: r[idx("option_b")], option_c: r[idx("option_c")], option_d: r[idx("option_d")],
-          correct_answer: Number(r[idx("correct_answer")]) || 0,
-          difficulty: (r[idx("difficulty")] as any) || "medium",
-          is_pyq: r[idx("is_pyq")] ? /^(true|yes|1)$/i.test(r[idx("is_pyq")]) : true,
-          year: r[idx("year")] ? Number(r[idx("year")]) : null,
-          explanation: r[idx("explanation")] || null,
-          tags: r[idx("tags")] ? r[idx("tags")].split(";").map((s: string) => s.trim()).filter(Boolean) : [],
-          status: (r[idx("status")] as any) || "published",
-        });
+        const r = rows[i];
+        const line = i + 1;
+        try {
+          const subjectName = r[iSubject]?.trim();
+          const chapterName = r[iChapter]?.trim();
+          const questionText = r[iText]?.trim();
+          if (!subjectName || !chapterName || !questionText) { skipped++; details.push(`Line ${line}: missing subject/chapter/question`); continue; }
+
+          const subject = await findOrCreateSubject(subjectName);
+          const subSubject = iSubSubject >= 0 ? await findOrCreateSubSubject(subject, r[iSubSubject] || "") : null;
+          const chapter = await findOrCreateChapter(subject, subSubject, chapterName);
+          if (!subject || !chapter) { failed++; continue; }
+
+          const correct = parseCorrect(r[iAns] || "");
+          if (correct < 0) { failed++; details.push(`Line ${line}: invalid correct_answer "${r[iAns]}"`); continue; }
+
+          // Skip duplicates: same chapter + identical question text (case-insensitive)
+          const { data: dup } = await supabase.from("questions")
+            .select("id").eq("chapter_id", chapter.id).ilike("text", questionText).limit(1);
+          if (dup && dup.length) { skipped++; details.push(`Line ${line}: duplicate`); continue; }
+
+          const payload = {
+            subject_id: subject.id, chapter_id: chapter.id, text: questionText,
+            option_a: r[iA] || "", option_b: r[iB] || "", option_c: r[iC] || "", option_d: r[iD] || "",
+            correct_answer: correct,
+            difficulty: (iDiff >= 0 ? (r[iDiff] || "").toLowerCase() : "medium") as any,
+            is_pyq: iPyq >= 0 ? /^(true|yes|1)$/i.test(r[iPyq] || "") : true,
+            year: iYear >= 0 && r[iYear] ? Number(r[iYear]) || null : null,
+            explanation: iExpl >= 0 ? (r[iExpl] || null) : null,
+            tags: iTags >= 0 && r[iTags] ? r[iTags].split(";").map((s) => s.trim()).filter(Boolean) : [],
+            status: (iStatus >= 0 ? (r[iStatus] || "published") : "published") as any,
+            language: iLang >= 0 ? (r[iLang] || null) : null,
+          };
+          const { error } = await supabase.from("questions").insert(payload);
+          if (error) { failed++; details.push(`Line ${line}: ${error.message}`); continue; }
+          imported++;
+        } catch (rowErr: any) {
+          failed++; details.push(`Line ${line}: ${rowErr.message}`);
+        }
       }
-      if (inserts.length === 0) { alert("No valid rows found."); return; }
-      const { error } = await supabase.from("questions").insert(inserts);
-      if (error) throw error;
-      alert(`Imported ${inserts.length} questions.`); load();
+
+      setImportSummary({ imported, skipped, failed, details: details.slice(0, 20) });
+      load();
     } catch (e: any) {
       alert("Import failed: " + e.message);
     } finally { setImporting(false); }
@@ -144,7 +264,7 @@ function QuestionsAdmin() {
       <div className="mb-4 flex flex-wrap justify-between gap-2">
         <label className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-muted">
           <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Bulk import (CSV)"}
-          <input type="file" accept=".csv" className="hidden" onChange={(e) => e.target.files?.[0] && bulkImport(e.target.files[0])} />
+          <input type="file" accept=".csv" className="hidden" disabled={importing} onChange={(e) => e.target.files?.[0] && bulkImport(e.target.files[0])} />
         </label>
         <button onClick={() => setEditing({ status: "published", difficulty: "medium", is_pyq: true, correct_answer: 0, tags: [] })}
           className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
@@ -152,7 +272,27 @@ function QuestionsAdmin() {
         </button>
       </div>
 
-      <p className="text-xs text-muted-foreground mb-2">CSV columns: subject_slug, chapter_slug, text, option_a..d, correct_answer (0-3), difficulty, is_pyq, year, explanation, tags (semicolon-separated), status</p>
+      <p className="text-xs text-muted-foreground mb-2">
+        CSV columns: <b>Subject</b>, <b>Sub Subject</b>, <b>Chapter</b>, <b>Question</b>, <b>Option A/B/C/D</b>, <b>Correct Answer</b> (0-3 or A-D), <b>Language</b>.
+        Missing Subjects, Sub Subjects and Chapters are created automatically. Duplicate questions in the same chapter are skipped.
+      </p>
+
+      {importSummary && (
+        <div className="mb-4 rounded-2xl border border-border bg-card p-4 text-sm">
+          <p className="font-semibold">Import summary</p>
+          <p className="text-muted-foreground mt-1">
+            Imported: <b className="text-emerald-500">{importSummary.imported}</b> ·
+            Skipped: <b className="text-amber-500"> {importSummary.skipped}</b> ·
+            Failed: <b className="text-destructive"> {importSummary.failed}</b>
+          </p>
+          {importSummary.details.length > 0 && (
+            <ul className="mt-2 text-xs text-muted-foreground space-y-0.5 max-h-40 overflow-auto">
+              {importSummary.details.map((d, i) => <li key={i}>• {d}</li>)}
+            </ul>
+          )}
+          <button onClick={() => setImportSummary(null)} className="mt-2 text-xs underline text-muted-foreground">Dismiss</button>
+        </div>
+      )}
 
       <Card className="!p-0 overflow-x-auto">
         {rows === null ? <div className="p-8 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></div> : (
@@ -233,7 +373,12 @@ function QuestionsAdmin() {
                 <input type="number" className="input mt-1" value={editing.year ?? ""} onChange={(e) => setEditing({ ...editing, year: Number(e.target.value) || null })} />
               </label>
             </div>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_pyq ?? true} onChange={(e) => setEditing({ ...editing, is_pyq: e.target.checked })} /> Previous Year Question</label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_pyq ?? true} onChange={(e) => setEditing({ ...editing, is_pyq: e.target.checked })} /> Previous Year Question</label>
+              <label className="block"><span className="text-xs uppercase font-semibold text-muted-foreground">Language</span>
+                <input className="input mt-1" value={editing.language ?? ""} onChange={(e) => setEditing({ ...editing, language: e.target.value })} placeholder="e.g. en, hi, sa" />
+              </label>
+            </div>
             <label className="block"><span className="text-xs uppercase font-semibold text-muted-foreground">Explanation (optional)</span>
               <textarea className="input mt-1" rows={2} value={editing.explanation ?? ""} onChange={(e) => setEditing({ ...editing, explanation: e.target.value })} />
             </label>
@@ -253,13 +398,12 @@ function QuestionsAdmin() {
   );
 }
 
-// Minimal CSV parser (handles quoted fields, commas, escaped quotes, newlines)
 function parseCSV(text: string): string[][] {
   const rows: string[][] = []; let row: string[] = []; let cur = ""; let inQ = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
     if (inQ) {
-      if (c === '"' && text[i+1] === '"') { cur += '"'; i++; }
+      if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; }
       else if (c === '"') inQ = false;
       else cur += c;
     } else {
