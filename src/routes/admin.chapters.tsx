@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminShell, Card } from "@/components/admin/AdminShell";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/chapters")({
@@ -9,30 +9,51 @@ export const Route = createFileRoute("/admin/chapters")({
   component: ChaptersAdmin,
 });
 
-type Chapter = { id: string; subject_id: string; slug: string; name: string; sort_order: number; is_active: boolean };
+type Chapter = {
+  id: string;
+  subject_id: string;
+  sub_subject_id: string | null;
+  slug: string;
+  name: string;
+  sort_order: number;
+  is_active: boolean;
+};
 type Subject = { id: string; name: string; slug: string };
+type SubSubject = { id: string; name: string; subject_id: string };
 
 function ChaptersAdmin() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subSubjects, setSubSubjects] = useState<SubSubject[]>([]);
   const [rows, setRows] = useState<Chapter[] | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [editing, setEditing] = useState<Partial<Chapter> | null>(null);
 
   const load = async () => {
-    const [subs, chaps] = await Promise.all([
+    const [subs, ss, chaps] = await Promise.all([
       supabase.from("subjects").select("id,name,slug").order("sort_order"),
+      supabase.from("sub_subjects").select("id,name,subject_id").order("sort_order"),
       supabase.from("chapters").select("*").order("sort_order"),
     ]);
     setSubjects((subs.data ?? []) as Subject[]);
+    setSubSubjects((ss.data ?? []) as SubSubject[]);
     setRows((chaps.data ?? []) as Chapter[]);
   };
   useEffect(() => { load(); }, []);
 
+  const editSubSubjects = useMemo(
+    () => subSubjects.filter((s) => s.subject_id === editing?.subject_id),
+    [subSubjects, editing?.subject_id],
+  );
+
   const save = async () => {
     if (!editing?.name || !editing?.slug || !editing?.subject_id) return;
     const payload = {
-      subject_id: editing.subject_id!, slug: editing.slug!, name: editing.name!,
-      sort_order: editing.sort_order ?? 0, is_active: editing.is_active ?? true,
+      subject_id: editing.subject_id!,
+      sub_subject_id: editing.sub_subject_id || null,
+      slug: editing.slug!,
+      name: editing.name!,
+      sort_order: editing.sort_order ?? 0,
+      is_active: editing.is_active ?? true,
     };
     if (editing.id) await supabase.from("chapters").update(payload).eq("id", editing.id);
     else await supabase.from("chapters").insert(payload);
@@ -47,6 +68,7 @@ function ChaptersAdmin() {
 
   const filtered = (rows ?? []).filter((r) => filter === "all" || r.subject_id === filter);
   const subjName = (id: string) => subjects.find((s) => s.id === id)?.name ?? "—";
+  const ssName = (id: string | null) => (id ? subSubjects.find((s) => s.id === id)?.name ?? "—" : "—");
 
   return (
     <AdminShell title="Chapters">
@@ -61,9 +83,17 @@ function ChaptersAdmin() {
       </div>
       <Card className="!p-0 overflow-x-auto">
         {rows === null ? <div className="p-8 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /></div> : (
-          <table className="w-full text-sm min-w-[600px]">
+          <table className="w-full text-sm min-w-[720px]">
             <thead className="bg-muted/40 text-xs uppercase tracking-wider text-muted-foreground">
-              <tr><th className="p-3 text-left">Order</th><th className="p-3 text-left">Name</th><th className="p-3 text-left">Subject</th><th className="p-3 text-left">Slug</th><th className="p-3 text-left">Active</th><th className="p-3"></th></tr>
+              <tr>
+                <th className="p-3 text-left">Order</th>
+                <th className="p-3 text-left">Name</th>
+                <th className="p-3 text-left">Subject</th>
+                <th className="p-3 text-left">Sub Subject</th>
+                <th className="p-3 text-left">Slug</th>
+                <th className="p-3 text-left">Active</th>
+                <th className="p-3"></th>
+              </tr>
             </thead>
             <tbody>
               {filtered.map((r) => (
@@ -71,6 +101,7 @@ function ChaptersAdmin() {
                   <td className="p-3">{r.sort_order}</td>
                   <td className="p-3 font-semibold">{r.name}</td>
                   <td className="p-3 text-muted-foreground">{subjName(r.subject_id)}</td>
+                  <td className="p-3 text-muted-foreground">{ssName(r.sub_subject_id)}</td>
                   <td className="p-3 text-muted-foreground">{r.slug}</td>
                   <td className="p-3">{r.is_active ? "Yes" : "No"}</td>
                   <td className="p-3 text-right">
@@ -79,7 +110,7 @@ function ChaptersAdmin() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={6} className="p-8 text-center text-muted-foreground">No chapters.</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">No chapters.</td></tr>}
             </tbody>
           </table>
         )}
@@ -90,9 +121,15 @@ function ChaptersAdmin() {
           <div className="w-full max-w-md rounded-2xl bg-card border border-border p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
             <h2 className="font-display font-bold text-lg">{editing.id ? "Edit chapter" : "Add chapter"}</h2>
             <label className="block"><span className="text-xs uppercase font-semibold text-muted-foreground">Subject</span>
-              <select className="input mt-1" value={editing.subject_id ?? ""} onChange={(e) => setEditing({ ...editing, subject_id: e.target.value })}>
+              <select className="input mt-1" value={editing.subject_id ?? ""} onChange={(e) => setEditing({ ...editing, subject_id: e.target.value, sub_subject_id: null })}>
                 <option value="">Select</option>
                 {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </label>
+            <label className="block"><span className="text-xs uppercase font-semibold text-muted-foreground">Sub Subject (optional)</span>
+              <select className="input mt-1" value={editing.sub_subject_id ?? ""} onChange={(e) => setEditing({ ...editing, sub_subject_id: e.target.value || null })} disabled={!editing.subject_id}>
+                <option value="">None</option>
+                {editSubSubjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </label>
             <label className="block"><span className="text-xs uppercase font-semibold text-muted-foreground">Name</span>
