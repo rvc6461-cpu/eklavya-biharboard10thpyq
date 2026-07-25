@@ -24,6 +24,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PracticeSubjectRouteImport } from './routes/practice.$subject'
 import { Route as MockTestSubjectRouteImport } from './routes/mock-test.$subject'
 import { Route as AdminSubjectsRouteImport } from './routes/admin.subjects'
+import { Route as AdminSubSubjectsRouteImport } from './routes/admin.sub-subjects'
 import { Route as AdminQuestionsRouteImport } from './routes/admin.questions'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminNotesRouteImport } from './routes/admin.notes'
@@ -112,6 +113,11 @@ const AdminSubjectsRoute = AdminSubjectsRouteImport.update({
   path: '/subjects',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSubSubjectsRoute = AdminSubSubjectsRouteImport.update({
+  id: '/sub-subjects',
+  path: '/sub-subjects',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminQuestionsRoute = AdminQuestionsRouteImport.update({
   id: '/questions',
   path: '/questions',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/admin/notes': typeof AdminNotesRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
   '/mock-test/$subject': typeof MockTestSubjectRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/admin/notes': typeof AdminNotesRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
   '/mock-test/$subject': typeof MockTestSubjectRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
@@ -255,6 +263,7 @@ export interface FileRoutesById {
   '/admin/notes': typeof AdminNotesRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/questions': typeof AdminQuestionsRoute
+  '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
   '/mock-test/$subject': typeof MockTestSubjectRoute
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/admin/notes'
     | '/admin/notifications'
     | '/admin/questions'
+    | '/admin/sub-subjects'
     | '/admin/subjects'
     | '/mock-test/$subject'
     | '/practice/$subject'
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/admin/notes'
     | '/admin/notifications'
     | '/admin/questions'
+    | '/admin/sub-subjects'
     | '/admin/subjects'
     | '/mock-test/$subject'
     | '/practice/$subject'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/admin/notes'
     | '/admin/notifications'
     | '/admin/questions'
+    | '/admin/sub-subjects'
     | '/admin/subjects'
     | '/mock-test/$subject'
     | '/practice/$subject'
@@ -478,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSubjectsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/sub-subjects': {
+      id: '/admin/sub-subjects'
+      path: '/sub-subjects'
+      fullPath: '/admin/sub-subjects'
+      preLoaderRoute: typeof AdminSubSubjectsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/questions': {
       id: '/admin/questions'
       path: '/questions'
@@ -572,6 +591,7 @@ interface AdminRouteChildren {
   AdminNotesRoute: typeof AdminNotesRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminQuestionsRoute: typeof AdminQuestionsRoute
+  AdminSubSubjectsRoute: typeof AdminSubSubjectsRoute
   AdminSubjectsRoute: typeof AdminSubjectsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -583,6 +603,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminNotesRoute: AdminNotesRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminQuestionsRoute: AdminQuestionsRoute,
+  AdminSubSubjectsRoute: AdminSubSubjectsRoute,
   AdminSubjectsRoute: AdminSubjectsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
