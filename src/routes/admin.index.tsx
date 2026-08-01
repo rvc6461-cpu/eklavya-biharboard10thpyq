@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/")({
 });
 
 type Stats = {
-  users: number; active: number; subjects: number; chapters: number;
+  users: number; active: number; subjects: number; subSubjects: number; chapters: number;
   questions: number; mocks: number; notes: number; attempts: number;
 };
 
@@ -28,9 +28,10 @@ function AdminDashboard() {
         return c ?? 0;
       };
       const sevenDaysAgo = new Date(Date.now() - 7 * 864e5).toISOString();
-      const [users, subjects, chapters, questions, mocks, notes, attempts, activeRes] = await Promise.all([
+      const [users, subjects, subSubjects, chapters, questions, mocks, notes, attempts, activeRes] = await Promise.all([
         count("profiles"),
         count("subjects"),
+        count("sub_subjects"),
         count("chapters"),
         count("questions"),
         count("mock_test_templates"),
@@ -39,7 +40,7 @@ function AdminDashboard() {
         supabase.from("attempts").select("user_id").gte("updated_at", sevenDaysAgo).limit(10000),
       ]);
       const active = new Set((activeRes.data ?? []).map((r: any) => r.user_id)).size;
-      setS({ users, active, subjects, chapters, questions, mocks, notes, attempts });
+      setS({ users, active, subjects, subSubjects, chapters, questions, mocks, notes, attempts });
     })();
   }, []);
 
@@ -47,6 +48,7 @@ function AdminDashboard() {
     { label: "Total Users", icon: Users, value: s?.users, color: "text-indigo-500" },
     { label: "Active (7d)", icon: UserCheck, value: s?.active, color: "text-emerald-500" },
     { label: "Subjects", icon: BookOpen, value: s?.subjects, color: "text-violet-500" },
+    { label: "Sub Subjects", icon: FolderTree, value: s?.subSubjects, color: "text-fuchsia-500" },
     { label: "Chapters", icon: Layers, value: s?.chapters, color: "text-sky-500" },
     { label: "Questions", icon: ListChecks, value: s?.questions, color: "text-amber-500" },
     { label: "Mock Tests", icon: ClipboardList, value: s?.mocks, color: "text-rose-500" },
