@@ -50,9 +50,6 @@ export type DbQuestion = {
   language?: string | null;
 };
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const isUuid = (v: string) => UUID_RE.test(v);
-
 export function toClientQuestion(row: DbQuestion): Question {
   return {
     id: row.id,
@@ -65,87 +62,95 @@ export function toClientQuestion(row: DbQuestion): Question {
 }
 
 export async function fetchSubjects(): Promise<DbSubject[]> {
-  const { data } = await supabase
+  const result = await supabase
     .from("subjects")
     .select("*")
     .eq("is_active", true)
     .order("sort_order");
-  return (data ?? []) as DbSubject[];
+  if (result.error || !result.data?.length) console.log("[Practice] subjects query result", result);
+  return (result.data ?? []) as DbSubject[];
 }
 
-export async function fetchSubjectBySlugOrId(idOrSlug: string): Promise<DbSubject | null> {
-  const { data } = await supabase
+export async function fetchSubjectById(subjectId: string): Promise<DbSubject | null> {
+  const result = await supabase
     .from("subjects")
     .select("*")
-    .eq(isUuid(idOrSlug) ? "id" : "slug", idOrSlug)
+    .eq("id", subjectId)
     .maybeSingle();
-  return (data as DbSubject) ?? null;
+  if (result.error || !result.data) console.log("[Practice] subject query result", { subjectId, ...result });
+  return (result.data as DbSubject) ?? null;
 }
 
 export async function fetchSubSubjects(subjectId: string): Promise<DbSubSubject[]> {
-  const { data } = await supabase
+  const result = await supabase
     .from("sub_subjects")
     .select("*")
     .eq("subject_id", subjectId)
     .eq("is_active", true)
     .order("sort_order");
-  return (data ?? []) as DbSubSubject[];
+  if (result.error || !result.data?.length) console.log("[Practice] sub-subjects query result", { subjectId, ...result });
+  return (result.data ?? []) as DbSubSubject[];
 }
 
-export async function fetchSubSubjectBySlugOrId(
+export async function fetchSubSubjectById(
   subjectId: string,
-  idOrSlug: string,
+  subSubjectId: string,
 ): Promise<DbSubSubject | null> {
-  const { data } = await supabase
+  const result = await supabase
     .from("sub_subjects")
     .select("*")
     .eq("subject_id", subjectId)
-    .eq(isUuid(idOrSlug) ? "id" : "slug", idOrSlug)
+    .eq("id", subSubjectId)
     .maybeSingle();
-  return (data as DbSubSubject) ?? null;
+  if (result.error || !result.data) console.log("[Practice] sub-subject query result", { subjectId, subSubjectId, ...result });
+  return (result.data as DbSubSubject) ?? null;
 }
 
 export async function fetchChaptersBySubject(subjectId: string): Promise<DbChapter[]> {
-  const { data } = await supabase
+  const result = await supabase
     .from("chapters")
     .select("*")
     .eq("subject_id", subjectId)
     .eq("is_active", true)
     .order("sort_order");
-  return (data ?? []) as DbChapter[];
+  if (result.error || !result.data?.length) console.log("[Practice] subject chapters query result", { subjectId, ...result });
+  return (result.data ?? []) as DbChapter[];
 }
 
 export async function fetchChaptersBySubSubject(subSubjectId: string): Promise<DbChapter[]> {
-  const { data } = await supabase
+  const result = await supabase
     .from("chapters")
     .select("*")
     .eq("sub_subject_id", subSubjectId)
     .eq("is_active", true)
     .order("sort_order");
-  return (data ?? []) as DbChapter[];
+  if (result.error || !result.data?.length) console.log("[Practice] sub-subject chapters query result", { subSubjectId, ...result });
+  return (result.data ?? []) as DbChapter[];
 }
 
-export async function fetchChapterBySlugOrId(
+export async function fetchChapterById(
   subjectId: string,
-  idOrSlug: string,
+  chapterId: string,
 ): Promise<DbChapter | null> {
-  const { data } = await supabase
+  const result = await supabase
     .from("chapters")
     .select("*")
     .eq("subject_id", subjectId)
-    .eq(isUuid(idOrSlug) ? "id" : "slug", idOrSlug)
+    .eq("id", chapterId)
     .maybeSingle();
-  return (data as DbChapter) ?? null;
+  if (result.error || !result.data) console.log("[Practice] chapter query result", { subjectId, chapterId, ...result });
+  return (result.data as DbChapter) ?? null;
 }
 
 export async function fetchChapterQuestions(chapterId: string): Promise<Question[]> {
-  const { data } = await supabase
+  const result = await supabase
     .from("questions")
     .select("*")
     .eq("chapter_id", chapterId)
     .eq("status", "published")
     .order("created_at", { ascending: true });
-  return ((data ?? []) as DbQuestion[]).map(toClientQuestion);
+  if (result.error || !result.data?.length) console.log("[Practice] chapter questions query result", { chapterId, ...result });
+  return ((result.data ?? []) as DbQuestion[]).map(toClientQuestion);
 }
 
 export async function fetchQuestionsByIds(ids: string[]): Promise<DbQuestion[]> {

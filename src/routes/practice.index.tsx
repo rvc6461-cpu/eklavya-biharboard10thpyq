@@ -99,7 +99,7 @@ function PracticeIndex() {
                   <Link
                     key={s.id}
                     to="/practice/$subject"
-                    params={{ subject: s.slug }}
+                    params={{ subject: s.id }}
                     className="bg-gradient-card flex items-center gap-4 rounded-2xl border border-border p-4"
                   >
                     <div className={`bg-gradient-to-br ${s.hue} flex h-12 w-12 items-center justify-center rounded-2xl font-display text-xl font-bold text-white shadow-lg`}>

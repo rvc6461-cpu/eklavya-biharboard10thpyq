@@ -5,14 +5,14 @@ import {
   RotateCcw, Trophy, Lightbulb, Shuffle,
 } from "lucide-react";
 import { buildPracticeSets, writeSetBestScore, type Question } from "@/lib/pyq/data";
-import { fetchSubjectBySlugOrId, fetchChapterBySlugOrId, fetchChapterQuestions } from "@/lib/pyq/db";
+import { fetchSubjectById, fetchChapterById, fetchChapterQuestions } from "@/lib/pyq/db";
 import { usePyqStore } from "@/lib/pyq/store";
 
 export const Route = createFileRoute("/practice/$subject/$chapter/$set")({
   loader: async ({ params }) => {
-    const subject = await fetchSubjectBySlugOrId(params.subject);
+    const subject = await fetchSubjectById(params.subject);
     if (!subject) throw notFound();
-    const chapter = await fetchChapterBySlugOrId(subject.id, params.chapter);
+    const chapter = await fetchChapterById(subject.id, params.chapter);
     if (!chapter) throw notFound();
     const questions = await fetchChapterQuestions(chapter.id);
     const sets = buildPracticeSets(questions);

@@ -3,16 +3,16 @@ import { ArrowLeft, ChevronRight, CheckCircle2, Trophy, ListChecks, Loader2 } fr
 import { useEffect, useState } from "react";
 import { buildPracticeSets, readSetBestScores, type Question } from "@/lib/pyq/data";
 import {
-  fetchSubjectBySlugOrId, fetchChapterBySlugOrId, fetchChapterQuestions,
+  fetchSubjectById, fetchChapterById, fetchChapterQuestions,
   type DbSubject, type DbChapter,
 } from "@/lib/pyq/db";
 import { usePyqStore } from "@/lib/pyq/store";
 
 export const Route = createFileRoute("/practice/$subject/$chapter/")({
   loader: async ({ params }) => {
-    const subject = await fetchSubjectBySlugOrId(params.subject);
+    const subject = await fetchSubjectById(params.subject);
     if (!subject) throw notFound();
-    const chapter = await fetchChapterBySlugOrId(subject.id, params.chapter);
+    const chapter = await fetchChapterById(subject.id, params.chapter);
     if (!chapter) throw notFound();
     const questions = await fetchChapterQuestions(chapter.id);
     return { subject, chapter, questions };
@@ -61,7 +61,7 @@ function ChapterSetsPage() {
         <header className="flex items-center justify-between px-5 pt-6 pb-4">
           <Link
             to="/practice/$subject"
-            params={{ subject: subject.slug }}
+             params={{ subject: subject.id }}
             className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -100,7 +100,7 @@ function ChapterSetsPage() {
                 <Link
                   key={setKey}
                   to="/practice/$subject/$chapter/$set"
-                  params={{ subject: subject.slug, chapter: chapter.slug, set: String(i + 1) }}
+                   params={{ subject: subject.id, chapter: chapter.id, set: String(i + 1) }}
                   className="bg-gradient-card block rounded-2xl border border-border p-4"
                 >
                   <div className="flex items-center gap-3">

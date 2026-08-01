@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight, Loader2, FolderTree } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  fetchSubjectBySlugOrId, fetchSubSubjects, fetchChaptersBySubject,
+  fetchSubjectById, fetchSubSubjects, fetchChaptersBySubject,
   type DbSubject, type DbSubSubject, type DbChapter,
 } from "@/lib/pyq/db";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +10,7 @@ import { usePyqStore } from "@/lib/pyq/store";
 
 export const Route = createFileRoute("/practice/$subject/")({
   loader: async ({ params }) => {
-    const subject = await fetchSubjectBySlugOrId(params.subject);
+    const subject = await fetchSubjectById(params.subject);
     if (!subject) throw notFound();
     return { subject };
   },
@@ -100,7 +100,7 @@ function SubjectPage() {
                     <Link
                       key={ss.id}
                       to="/practice/$subject/group/$subsubject"
-                      params={{ subject: subject.slug, subsubject: ss.slug }}
+                      params={{ subject: subject.id, subsubject: ss.id }}
                       className="bg-gradient-card block rounded-2xl border border-border p-4"
                     >
                       <div className="flex items-center gap-3">
@@ -147,7 +147,7 @@ function ChapterCard({ subject, chapter, total, attemptedMap }: { subject: DbSub
   return (
     <Link
       to="/practice/$subject/$chapter"
-      params={{ subject: subject.slug, chapter: chapter.slug }}
+      params={{ subject: subject.id, chapter: chapter.id }}
       className="bg-gradient-card block rounded-2xl border border-border p-4"
     >
       <div className="flex items-center gap-3">
