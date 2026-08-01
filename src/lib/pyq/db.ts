@@ -50,6 +50,9 @@ export type DbQuestion = {
   language?: string | null;
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const isUuid = (v: string) => UUID_RE.test(v);
+
 export function toClientQuestion(row: DbQuestion): Question {
   return {
     id: row.id,
@@ -74,7 +77,7 @@ export async function fetchSubjectBySlugOrId(idOrSlug: string): Promise<DbSubjec
   const { data } = await supabase
     .from("subjects")
     .select("*")
-    .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+    .eq(isUuid(idOrSlug) ? "id" : "slug", idOrSlug)
     .maybeSingle();
   return (data as DbSubject) ?? null;
 }
@@ -97,7 +100,7 @@ export async function fetchSubSubjectBySlugOrId(
     .from("sub_subjects")
     .select("*")
     .eq("subject_id", subjectId)
-    .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+    .eq(isUuid(idOrSlug) ? "id" : "slug", idOrSlug)
     .maybeSingle();
   return (data as DbSubSubject) ?? null;
 }
@@ -130,7 +133,7 @@ export async function fetchChapterBySlugOrId(
     .from("chapters")
     .select("*")
     .eq("subject_id", subjectId)
-    .or(`id.eq.${idOrSlug},slug.eq.${idOrSlug}`)
+    .eq(isUuid(idOrSlug) ? "id" : "slug", idOrSlug)
     .maybeSingle();
   return (data as DbChapter) ?? null;
 }
