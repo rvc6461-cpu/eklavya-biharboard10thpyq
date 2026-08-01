@@ -8,7 +8,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { usePyqStore } from "@/lib/pyq/store";
 
-export const Route = createFileRoute("/practice/$subject/$subsubject")({
+export const Route = createFileRoute("/practice/$subject/group/$subsubject")({
   loader: async ({ params }) => {
     const subject = await fetchSubjectBySlugOrId(params.subject);
     if (!subject) throw notFound();
