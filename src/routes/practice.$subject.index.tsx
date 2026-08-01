@@ -99,7 +99,7 @@ function SubjectPage() {
                   {subSubjects.map((ss) => (
                     <Link
                       key={ss.id}
-                      to="/practice/$subject/$subsubject"
+                      to="/practice/$subject/group/$subsubject"
                       params={{ subject: subject.slug, subsubject: ss.slug }}
                       className="bg-gradient-card block rounded-2xl border border-border p-4"
                     >
