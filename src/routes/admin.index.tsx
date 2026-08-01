@@ -3,7 +3,7 @@ import { AdminShell, Card } from "@/components/admin/AdminShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
-  Users, UserCheck, BookOpen, Layers, ListChecks, ClipboardList, FileText, Activity,
+  Users, UserCheck, BookOpen, Layers, ListChecks, ClipboardList, FileText, Activity, FolderTree,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
