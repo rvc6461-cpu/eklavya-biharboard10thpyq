@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  fetchSubjectBySlugOrId, fetchSubSubjectBySlugOrId, fetchChaptersBySubSubject,
+  fetchSubjectById, fetchSubSubjectById, fetchChaptersBySubSubject,
   type DbSubject, type DbSubSubject, type DbChapter,
 } from "@/lib/pyq/db";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,9 +10,9 @@ import { usePyqStore } from "@/lib/pyq/store";
 
 export const Route = createFileRoute("/practice/$subject/group/$subsubject")({
   loader: async ({ params }) => {
-    const subject = await fetchSubjectBySlugOrId(params.subject);
+    const subject = await fetchSubjectById(params.subject);
     if (!subject) throw notFound();
-    const subSubject = await fetchSubSubjectBySlugOrId(subject.id, params.subsubject);
+    const subSubject = await fetchSubSubjectById(subject.id, params.subsubject);
     if (!subSubject) throw notFound();
     return { subject, subSubject };
   },
@@ -61,7 +61,7 @@ function SubSubjectPage() {
     <div className="min-h-screen bg-background pb-16 text-foreground">
       <div className="mx-auto max-w-md">
         <header className="flex items-center justify-between px-5 pt-6 pb-4">
-          <Link to="/practice/$subject" params={{ subject: subject.slug }} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card">
+          <Link to="/practice/$subject" params={{ subject: subject.id }} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div className="min-w-0 flex-1 text-center">
@@ -90,7 +90,7 @@ function SubSubjectPage() {
                 <Link
                   key={ch.id}
                   to="/practice/$subject/$chapter"
-                  params={{ subject: subject.slug, chapter: ch.slug }}
+                  params={{ subject: subject.id, chapter: ch.id }}
                   className="bg-gradient-card block rounded-2xl border border-border p-4"
                 >
                   <div className="flex items-center gap-3">
