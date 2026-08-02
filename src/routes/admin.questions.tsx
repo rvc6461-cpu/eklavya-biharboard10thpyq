@@ -141,7 +141,7 @@ function QuestionsAdmin() {
           .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
           .replace(/^-|-$/g, "")
           .slice(0, 50);
-        const ascii = base.replace(/[^a-z0-9-]/g, "");
+        const ascii = base.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
         // Non-latin names get a deterministic, unique suffix so two different
         // Sanskrit names can never collide on the same slug.
         return ascii === base && base ? base : `${ascii || "item"}-${hash(norm(s))}`;
