@@ -127,13 +127,30 @@ function QuestionsAdmin() {
       const subSubjectsCache = [...(ssRows ?? [])] as any[];
       const chaptersCache = [...(chapRows ?? [])] as any[];
 
-      const slugify = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "item";
-      const norm = (s: string) => s.trim().toLowerCase();
+      // Unicode-safe: keeps Devanagari/Hindi/Sanskrit characters instead of
+      // collapsing every non-ASCII name to the same slug (root cause of the
+      // "everything linked to the first sub subject/chapter" bug).
+      const hash = (s: string) => {
+        let h = 5381;
+        for (let n = 0; n < s.length; n++) h = ((h << 5) + h + s.charCodeAt(n)) >>> 0;
+        return h.toString(36);
+      };
+      const norm = (s: string) => (s ?? "").normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase();
+      const slugify = (s: string) => {
+        const base = norm(s)
+          .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+          .replace(/^-|-$/g, "")
+          .slice(0, 50);
+        const ascii = base.replace(/[^a-z0-9-]/g, "");
+        // Non-latin names get a deterministic, unique suffix so two different
+        // Sanskrit names can never collide on the same slug.
+        return ascii === base && base ? base : `${ascii || "item"}-${hash(norm(s))}`;
+      };
 
       const findOrCreateSubject = async (raw: string) => {
-        const name = raw.trim(); if (!name) return null;
+        const name = (raw ?? "").normalize("NFC").trim(); if (!name) return null;
         const slug = slugify(name);
-        let found = subjectsCache.find((s) => norm(s.name) === norm(name) || s.slug === slug);
+        const found = subjectsCache.find((s) => norm(s.name) === norm(name) || s.slug === slug);
         if (found) return found;
         const { data, error } = await supabase.from("subjects").insert({
           slug, name, short: name.slice(0, 4), glyph: "★", hue: "from-indigo-500 to-violet-600",
@@ -145,9 +162,11 @@ function QuestionsAdmin() {
       };
 
       const findOrCreateSubSubject = async (subject: any, raw: string) => {
-        const name = raw.trim(); if (!name) return null;
+        const name = (raw ?? "").normalize("NFC").trim(); if (!name) return null;
         const slug = slugify(name);
-        let found = subSubjectsCache.find((s) => s.subject_id === subject.id && (norm(s.name) === norm(name) || s.slug === slug));
+        const found = subSubjectsCache.find(
+          (s) => s.subject_id === subject.id && (norm(s.name) === norm(name) || s.slug === slug),
+        );
         if (found) return found;
         const { data, error } = await supabase.from("sub_subjects").insert({
           subject_id: subject.id, slug, name,
@@ -160,9 +179,15 @@ function QuestionsAdmin() {
       };
 
       const findOrCreateChapter = async (subject: any, subSubject: any | null, raw: string) => {
-        const name = raw.trim(); if (!name) return null;
+        const name = (raw ?? "").normalize("NFC").trim(); if (!name) return null;
         const slug = slugify(name);
-        let found = chaptersCache.find((c) => c.subject_id === subject.id && (norm(c.name) === norm(name) || c.slug === slug));
+        // Scope the lookup to the row's sub subject so identically named
+        // chapters under different sub subjects stay separate.
+        const matches = (c: any) =>
+          c.subject_id === subject.id && (norm(c.name) === norm(name) || c.slug === slug);
+        const found = subSubject
+          ? chaptersCache.find((c) => matches(c) && (c.sub_subject_id === subSubject.id || !c.sub_subject_id))
+          : chaptersCache.find((c) => matches(c));
         if (found) {
           if (subSubject && !found.sub_subject_id) {
             await supabase.from("chapters").update({ sub_subject_id: subSubject.id }).eq("id", found.id);
@@ -171,7 +196,11 @@ function QuestionsAdmin() {
           return found;
         }
         const { data, error } = await supabase.from("chapters").insert({
-          subject_id: subject.id, sub_subject_id: subSubject?.id ?? null, slug, name,
+          subject_id: subject.id, sub_subject_id: subSubject?.id ?? null,
+          slug: chaptersCache.some((c) => c.slug === slug && c.subject_id === subject.id)
+            ? `${slug}-${hash(norm(name) + (subSubject?.id ?? ""))}`
+            : slug,
+          name,
           sort_order: chaptersCache.filter((c) => c.subject_id === subject.id).length,
           is_active: true,
         }).select("id,name,slug,subject_id,sub_subject_id").single();
