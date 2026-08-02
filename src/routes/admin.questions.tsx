@@ -88,7 +88,7 @@ function QuestionsAdmin() {
     const details: string[] = [];
     let imported = 0, skipped = 0, failed = 0;
     try {
-      const text = await file.text();
+      const text = (await file.text()).replace(/^\uFEFF/, "").normalize("NFC");
       const rows = parseCSV(text).filter((r) => r.some((c) => c.trim() !== ""));
       if (!rows.length) throw new Error("Empty CSV.");
       const header = rows[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
