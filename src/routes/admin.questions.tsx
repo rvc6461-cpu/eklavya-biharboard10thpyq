@@ -21,11 +21,13 @@ const PAGE_SIZE = 20;
 
 function QuestionsAdmin() {
   const [subjects, setSubjects] = useState<any[]>([]);
+  const [subSubjects, setSubSubjects] = useState<any[]>([]);
   const [chapters, setChapters] = useState<any[]>([]);
   const [rows, setRows] = useState<Q[] | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [subjectFilter, setSubjectFilter] = useState("all");
+  const [subSubjectFilter, setSubSubjectFilter] = useState("all");
   const [chapterFilter, setChapterFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
@@ -33,25 +35,54 @@ function QuestionsAdmin() {
   const [editing, setEditing] = useState<Partial<Q> | null>(null);
   const [importing, setImporting] = useState(false);
   const [importSummary, setImportSummary] = useState<null | { imported: number; skipped: number; failed: number; details: string[] }>(null);
+  const [confirmBulk, setConfirmBulk] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   useEffect(() => {
     supabase.from("subjects").select("*").order("sort_order").then(({ data }) => setSubjects(data ?? []));
+    supabase.from("sub_subjects").select("*").order("sort_order").then(({ data }) => setSubSubjects(data ?? []));
     supabase.from("chapters").select("*").order("sort_order").then(({ data }) => setChapters(data ?? []));
   }, []);
 
-  const load = async () => {
-    setRows(null);
-    let q: any = supabase.from("questions").select("*", { count: "exact" });
+  // Chapter ids implied by the sub subject filter (questions store chapter_id).
+  const subSubjectChapterIds = useMemo(
+    () => (subSubjectFilter === "all" ? null : chapters.filter((c) => c.sub_subject_id === subSubjectFilter).map((c) => c.id)),
+    [subSubjectFilter, chapters],
+  );
+
+  const applyFilters = (q: any) => {
     if (subjectFilter !== "all") q = q.eq("subject_id", subjectFilter);
     if (chapterFilter !== "all") q = q.eq("chapter_id", chapterFilter);
+    else if (subSubjectChapterIds) q = q.in("chapter_id", subSubjectChapterIds.length ? subSubjectChapterIds : ["00000000-0000-0000-0000-000000000000"]);
     if (statusFilter !== "all") q = q.eq("status", statusFilter);
     if (difficultyFilter !== "all") q = q.eq("difficulty", difficultyFilter);
     if (search.trim()) q = q.ilike("text", `%${search.trim()}%`);
+    return q;
+  };
+
+  const load = async () => {
+    setRows(null);
+    let q: any = applyFilters(supabase.from("questions").select("*", { count: "exact" }));
     q = q.order("created_at", { ascending: false }).range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
     const { data, count } = await q;
     setRows((data ?? []) as Q[]); setTotal(count ?? 0);
   };
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [subjectFilter, chapterFilter, statusFilter, difficultyFilter, search, page]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [subjectFilter, subSubjectFilter, chapterFilter, statusFilter, difficultyFilter, search, page, chapters.length]);
+
+  const bulkDeleteFiltered = async () => {
+    setBulkDeleting(true);
+    try {
+      // Single delete statement scoped by the active filters.
+      const { error } = await applyFilters(supabase.from("questions").delete());
+      if (error) throw error;
+      setConfirmBulk(false);
+      setPage(0);
+      await load();
+    } catch (e: any) {
+      alert("Bulk delete failed: " + (e?.message || e));
+    } finally { setBulkDeleting(false); }
+  };
+
 
   const chapMap = useMemo(() => Object.fromEntries(chapters.map((c) => [c.id, c])), [chapters]);
   const subjMap = useMemo(() => Object.fromEntries(subjects.map((s) => [s.id, s])), [subjects]);
