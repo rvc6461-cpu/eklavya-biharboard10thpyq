@@ -314,13 +314,19 @@ function QuestionsAdmin() {
   return (
     <AdminShell title="Questions">
       <div className="mb-4 grid grid-cols-2 md:grid-cols-6 gap-2">
-        <select className="input col-span-2 md:col-span-1" value={subjectFilter} onChange={(e) => { setSubjectFilter(e.target.value); setChapterFilter("all"); setPage(0); }}>
+        <select className="input col-span-2 md:col-span-1" value={subjectFilter} onChange={(e) => { setSubjectFilter(e.target.value); setSubSubjectFilter("all"); setChapterFilter("all"); setPage(0); }}>
           <option value="all">All subjects</option>
           {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
+        <select className="input col-span-2 md:col-span-1" value={subSubjectFilter} onChange={(e) => { setSubSubjectFilter(e.target.value); setChapterFilter("all"); setPage(0); }}>
+          <option value="all">All sub subjects</option>
+          {subSubjects.filter((s) => subjectFilter === "all" || s.subject_id === subjectFilter).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
         <select className="input col-span-2 md:col-span-1" value={chapterFilter} onChange={(e) => { setChapterFilter(e.target.value); setPage(0); }}>
           <option value="all">All chapters</option>
-          {chapters.filter((c) => subjectFilter === "all" || c.subject_id === subjectFilter).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {chapters
+            .filter((c) => (subjectFilter === "all" || c.subject_id === subjectFilter) && (subSubjectFilter === "all" || c.sub_subject_id === subSubjectFilter))
+            .map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         <select className="input" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}>
           <option value="all">Any status</option><option value="published">Published</option><option value="draft">Draft</option>
@@ -334,16 +340,44 @@ function QuestionsAdmin() {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap justify-between gap-2">
-        <label className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-muted">
-          <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Bulk import (CSV)"}
-          <input type="file" accept=".csv" className="hidden" disabled={importing} onChange={(e) => e.target.files?.[0] && bulkImport(e.target.files[0])} />
-        </label>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-muted">
+            <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Bulk import (CSV)"}
+            <input type="file" accept=".csv" className="hidden" disabled={importing} onChange={(e) => e.target.files?.[0] && bulkImport(e.target.files[0])} />
+          </label>
+          <span className="text-xs text-muted-foreground">{total.toLocaleString()} matching questions</span>
+          <button
+            onClick={() => setConfirmBulk(true)}
+            disabled={total === 0 || rows === null}
+            className="inline-flex items-center gap-2 rounded-xl border border-destructive/40 px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-40"
+          >
+            <Trash2 className="h-4 w-4" /> Delete filtered questions
+          </button>
+        </div>
         <button onClick={() => setEditing({ status: "published", difficulty: "medium", is_pyq: true, correct_answer: 0, tags: [] })}
           className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
           <Plus className="h-4 w-4" /> Add question
         </button>
       </div>
+
+      {confirmBulk && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => !bulkDeleting && setConfirmBulk(false)}>
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="text-lg font-bold">Delete questions?</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              You are about to delete {total.toLocaleString()} questions. This action cannot be undone.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button disabled={bulkDeleting} onClick={() => setConfirmBulk(false)} className="rounded-xl border border-border px-4 py-2 text-sm font-semibold disabled:opacity-40">Cancel</button>
+              <button disabled={bulkDeleting} onClick={bulkDeleteFiltered} className="inline-flex items-center gap-2 rounded-xl bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground disabled:opacity-40">
+                {bulkDeleting && <Loader2 className="h-4 w-4 animate-spin" />} Delete {total.toLocaleString()}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <p className="text-xs text-muted-foreground mb-2">
         CSV columns: <b>Subject</b>, <b>Sub Subject</b>, <b>Chapter</b>, <b>Question</b>, <b>Option A/B/C/D</b>, <b>Correct Answer</b> (0-3 or A-D), <b>Language</b>.
