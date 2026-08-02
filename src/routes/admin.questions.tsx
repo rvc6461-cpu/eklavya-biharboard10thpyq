@@ -216,47 +216,60 @@ function QuestionsAdmin() {
         return -1;
       };
 
+      const cell = (r: string[], i: number) => (i >= 0 && r[i] != null ? String(r[i]).normalize("NFC").trim() : "");
+
       for (let i = 1; i < rows.length; i++) {
         const r = rows[i];
         const line = i + 1;
+        // Every row resolves its own subject / sub subject / chapter — nothing
+        // is carried over from the previous iteration.
+        let subject: any = null, subSubject: any = null, chapter: any = null;
         try {
-          const subjectName = r[iSubject]?.trim();
-          const chapterName = r[iChapter]?.trim();
-          const questionText = r[iText]?.trim();
-          if (!subjectName || !chapterName || !questionText) { skipped++; details.push(`Line ${line}: missing subject/chapter/question`); continue; }
+          const subjectName = cell(r, iSubject);
+          const subSubjectName = cell(r, iSubSubject);
+          const chapterName = cell(r, iChapter);
+          const questionText = cell(r, iText);
+          if (!subjectName || !chapterName || !questionText) {
+            skipped++;
+            details.push(`Line ${line}: missing ${[!subjectName && "subject", !chapterName && "chapter", !questionText && "question"].filter(Boolean).join(", ")}`);
+            continue;
+          }
 
-          const subject = await findOrCreateSubject(subjectName);
-          const subSubject = iSubSubject >= 0 ? await findOrCreateSubSubject(subject, r[iSubSubject] || "") : null;
-          const chapter = await findOrCreateChapter(subject, subSubject, chapterName);
-          if (!subject || !chapter) { failed++; continue; }
+          subject = await findOrCreateSubject(subjectName);
+          if (!subject) { failed++; details.push(`Line ${line}: could not resolve subject "${subjectName}"`); continue; }
+          subSubject = subSubjectName ? await findOrCreateSubSubject(subject, subSubjectName) : null;
+          chapter = await findOrCreateChapter(subject, subSubject, chapterName);
+          if (!chapter) { failed++; details.push(`Line ${line}: could not resolve chapter "${chapterName}"`); continue; }
 
-          const correct = parseCorrect(r[iAns] || "");
-          if (correct < 0) { failed++; details.push(`Line ${line}: invalid correct_answer "${r[iAns]}"`); continue; }
+          const correct = parseCorrect(cell(r, iAns));
+          if (correct < 0) { failed++; details.push(`Line ${line}: invalid correct_answer "${cell(r, iAns)}"`); continue; }
 
-          // Skip duplicates: same chapter + identical question text (case-insensitive)
+          // Skip duplicates: same chapter + identical question text
           const { data: dup } = await supabase.from("questions")
-            .select("id").eq("chapter_id", chapter.id).ilike("text", questionText).limit(1);
-          if (dup && dup.length) { skipped++; details.push(`Line ${line}: duplicate`); continue; }
+            .select("id").eq("chapter_id", chapter.id).eq("text", questionText).limit(1);
+          if (dup && dup.length) { skipped++; details.push(`Line ${line}: duplicate in chapter "${chapter.name}"`); continue; }
 
+          const diffRaw = cell(r, iDiff).toLowerCase();
           const payload = {
             subject_id: subject.id, chapter_id: chapter.id, text: questionText,
-            option_a: r[iA] || "", option_b: r[iB] || "", option_c: r[iC] || "", option_d: r[iD] || "",
+            option_a: cell(r, iA), option_b: cell(r, iB), option_c: cell(r, iC), option_d: cell(r, iD),
             correct_answer: correct,
-            difficulty: (iDiff >= 0 ? (r[iDiff] || "").toLowerCase() : "medium") as any,
-            is_pyq: iPyq >= 0 ? /^(true|yes|1)$/i.test(r[iPyq] || "") : true,
-            year: iYear >= 0 && r[iYear] ? Number(r[iYear]) || null : null,
-            explanation: iExpl >= 0 ? (r[iExpl] || null) : null,
-            tags: iTags >= 0 && r[iTags] ? r[iTags].split(";").map((s) => s.trim()).filter(Boolean) : [],
-            status: (iStatus >= 0 ? (r[iStatus] || "published") : "published") as any,
-            language: iLang >= 0 ? (r[iLang] || null) : null,
+            difficulty: (["easy", "medium", "hard"].includes(diffRaw) ? diffRaw : "medium") as any,
+            is_pyq: iPyq >= 0 ? /^(true|yes|1)$/i.test(cell(r, iPyq)) : true,
+            year: cell(r, iYear) ? Number(cell(r, iYear)) || null : null,
+            explanation: cell(r, iExpl) || null,
+            tags: cell(r, iTags) ? cell(r, iTags).split(";").map((s) => s.trim()).filter(Boolean) : [],
+            status: (cell(r, iStatus) === "draft" ? "draft" : "published") as any,
+            language: cell(r, iLang) || null,
           };
           const { error } = await supabase.from("questions").insert(payload);
           if (error) { failed++; details.push(`Line ${line}: ${error.message}`); continue; }
           imported++;
         } catch (rowErr: any) {
-          failed++; details.push(`Line ${line}: ${rowErr.message}`);
+          failed++; details.push(`Line ${line}: ${rowErr?.message ?? String(rowErr)}`);
         }
       }
+
 
       setImportSummary({ imported, skipped, failed, details: details.slice(0, 20) });
       load();
