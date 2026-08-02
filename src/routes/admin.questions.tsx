@@ -21,11 +21,13 @@ const PAGE_SIZE = 20;
 
 function QuestionsAdmin() {
   const [subjects, setSubjects] = useState<any[]>([]);
+  const [subSubjects, setSubSubjects] = useState<any[]>([]);
   const [chapters, setChapters] = useState<any[]>([]);
   const [rows, setRows] = useState<Q[] | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [subjectFilter, setSubjectFilter] = useState("all");
+  const [subSubjectFilter, setSubSubjectFilter] = useState("all");
   const [chapterFilter, setChapterFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
@@ -33,25 +35,54 @@ function QuestionsAdmin() {
   const [editing, setEditing] = useState<Partial<Q> | null>(null);
   const [importing, setImporting] = useState(false);
   const [importSummary, setImportSummary] = useState<null | { imported: number; skipped: number; failed: number; details: string[] }>(null);
+  const [confirmBulk, setConfirmBulk] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   useEffect(() => {
     supabase.from("subjects").select("*").order("sort_order").then(({ data }) => setSubjects(data ?? []));
+    supabase.from("sub_subjects").select("*").order("sort_order").then(({ data }) => setSubSubjects(data ?? []));
     supabase.from("chapters").select("*").order("sort_order").then(({ data }) => setChapters(data ?? []));
   }, []);
 
-  const load = async () => {
-    setRows(null);
-    let q: any = supabase.from("questions").select("*", { count: "exact" });
+  // Chapter ids implied by the sub subject filter (questions store chapter_id).
+  const subSubjectChapterIds = useMemo(
+    () => (subSubjectFilter === "all" ? null : chapters.filter((c) => c.sub_subject_id === subSubjectFilter).map((c) => c.id)),
+    [subSubjectFilter, chapters],
+  );
+
+  const applyFilters = (q: any) => {
     if (subjectFilter !== "all") q = q.eq("subject_id", subjectFilter);
     if (chapterFilter !== "all") q = q.eq("chapter_id", chapterFilter);
+    else if (subSubjectChapterIds) q = q.in("chapter_id", subSubjectChapterIds.length ? subSubjectChapterIds : ["00000000-0000-0000-0000-000000000000"]);
     if (statusFilter !== "all") q = q.eq("status", statusFilter);
     if (difficultyFilter !== "all") q = q.eq("difficulty", difficultyFilter);
     if (search.trim()) q = q.ilike("text", `%${search.trim()}%`);
+    return q;
+  };
+
+  const load = async () => {
+    setRows(null);
+    let q: any = applyFilters(supabase.from("questions").select("*", { count: "exact" }));
     q = q.order("created_at", { ascending: false }).range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
     const { data, count } = await q;
     setRows((data ?? []) as Q[]); setTotal(count ?? 0);
   };
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [subjectFilter, chapterFilter, statusFilter, difficultyFilter, search, page]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [subjectFilter, subSubjectFilter, chapterFilter, statusFilter, difficultyFilter, search, page, chapters.length]);
+
+  const bulkDeleteFiltered = async () => {
+    setBulkDeleting(true);
+    try {
+      // Single delete statement scoped by the active filters.
+      const { error } = await applyFilters(supabase.from("questions").delete());
+      if (error) throw error;
+      setConfirmBulk(false);
+      setPage(0);
+      await load();
+    } catch (e: any) {
+      alert("Bulk delete failed: " + (e?.message || e));
+    } finally { setBulkDeleting(false); }
+  };
+
 
   const chapMap = useMemo(() => Object.fromEntries(chapters.map((c) => [c.id, c])), [chapters]);
   const subjMap = useMemo(() => Object.fromEntries(subjects.map((s) => [s.id, s])), [subjects]);
@@ -283,13 +314,19 @@ function QuestionsAdmin() {
   return (
     <AdminShell title="Questions">
       <div className="mb-4 grid grid-cols-2 md:grid-cols-6 gap-2">
-        <select className="input col-span-2 md:col-span-1" value={subjectFilter} onChange={(e) => { setSubjectFilter(e.target.value); setChapterFilter("all"); setPage(0); }}>
+        <select className="input col-span-2 md:col-span-1" value={subjectFilter} onChange={(e) => { setSubjectFilter(e.target.value); setSubSubjectFilter("all"); setChapterFilter("all"); setPage(0); }}>
           <option value="all">All subjects</option>
           {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
+        <select className="input col-span-2 md:col-span-1" value={subSubjectFilter} onChange={(e) => { setSubSubjectFilter(e.target.value); setChapterFilter("all"); setPage(0); }}>
+          <option value="all">All sub subjects</option>
+          {subSubjects.filter((s) => subjectFilter === "all" || s.subject_id === subjectFilter).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
         <select className="input col-span-2 md:col-span-1" value={chapterFilter} onChange={(e) => { setChapterFilter(e.target.value); setPage(0); }}>
           <option value="all">All chapters</option>
-          {chapters.filter((c) => subjectFilter === "all" || c.subject_id === subjectFilter).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {chapters
+            .filter((c) => (subjectFilter === "all" || c.subject_id === subjectFilter) && (subSubjectFilter === "all" || c.sub_subject_id === subSubjectFilter))
+            .map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         <select className="input" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }}>
           <option value="all">Any status</option><option value="published">Published</option><option value="draft">Draft</option>
@@ -303,16 +340,44 @@ function QuestionsAdmin() {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap justify-between gap-2">
-        <label className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-muted">
-          <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Bulk import (CSV)"}
-          <input type="file" accept=".csv" className="hidden" disabled={importing} onChange={(e) => e.target.files?.[0] && bulkImport(e.target.files[0])} />
-        </label>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-muted">
+            <Upload className="h-4 w-4" /> {importing ? "Importing…" : "Bulk import (CSV)"}
+            <input type="file" accept=".csv" className="hidden" disabled={importing} onChange={(e) => e.target.files?.[0] && bulkImport(e.target.files[0])} />
+          </label>
+          <span className="text-xs text-muted-foreground">{total.toLocaleString()} matching questions</span>
+          <button
+            onClick={() => setConfirmBulk(true)}
+            disabled={total === 0 || rows === null}
+            className="inline-flex items-center gap-2 rounded-xl border border-destructive/40 px-4 py-2 text-sm font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-40"
+          >
+            <Trash2 className="h-4 w-4" /> Delete filtered questions
+          </button>
+        </div>
         <button onClick={() => setEditing({ status: "published", difficulty: "medium", is_pyq: true, correct_answer: 0, tags: [] })}
           className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
           <Plus className="h-4 w-4" /> Add question
         </button>
       </div>
+
+      {confirmBulk && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => !bulkDeleting && setConfirmBulk(false)}>
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="text-lg font-bold">Delete questions?</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              You are about to delete {total.toLocaleString()} questions. This action cannot be undone.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button disabled={bulkDeleting} onClick={() => setConfirmBulk(false)} className="rounded-xl border border-border px-4 py-2 text-sm font-semibold disabled:opacity-40">Cancel</button>
+              <button disabled={bulkDeleting} onClick={bulkDeleteFiltered} className="inline-flex items-center gap-2 rounded-xl bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground disabled:opacity-40">
+                {bulkDeleting && <Loader2 className="h-4 w-4 animate-spin" />} Delete {total.toLocaleString()}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <p className="text-xs text-muted-foreground mb-2">
         CSV columns: <b>Subject</b>, <b>Sub Subject</b>, <b>Chapter</b>, <b>Question</b>, <b>Option A/B/C/D</b>, <b>Correct Answer</b> (0-3 or A-D), <b>Language</b>.
