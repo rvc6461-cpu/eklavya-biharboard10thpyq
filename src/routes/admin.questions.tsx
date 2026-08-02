@@ -271,7 +271,7 @@ function QuestionsAdmin() {
       }
 
 
-      setImportSummary({ imported, skipped, failed, details: details.slice(0, 20) });
+      setImportSummary({ imported, skipped, failed, details });
       load();
     } catch (e: any) {
       alert("Import failed: " + e.message);
