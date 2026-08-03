@@ -170,3 +170,54 @@ export async function fetchLookupMaps() {
   const chapters = Object.fromEntries((chapRes.data ?? []).map((c: any) => [c.id, c]));
   return { subjects, subSubjects, chapters };
 }
+
+// Phase 2A – Mock Test engine helpers.
+export async function fetchSubjectQuestionIds(subjectId: string): Promise<string[]> {
+  const ids: string[] = [];
+  const page = 1000;
+  for (let from = 0; ; from += page) {
+    const result = await supabase
+      .from("questions")
+      .select("id")
+      .eq("subject_id", subjectId)
+      .eq("status", "published")
+      .range(from, from + page - 1);
+    if (result.error) {
+      console.log("[MockTest] question ids query result", { subjectId, ...result });
+      break;
+    }
+    const rows = (result.data ?? []) as { id: string }[];
+    ids.push(...rows.map((r) => r.id));
+    if (rows.length < page) break;
+  }
+  return ids;
+}
+
+export async function fetchSubjectQuestionsByIds(
+  subjectId: string,
+  ids: string[],
+): Promise<DbQuestion[]> {
+  if (!ids.length) return [];
+  const out: DbQuestion[] = [];
+  for (let i = 0; i < ids.length; i += 200) {
+    const result = await supabase
+      .from("questions")
+      .select("*")
+      .eq("subject_id", subjectId)
+      .eq("status", "published")
+      .in("id", ids.slice(i, i + 200));
+    if (result.error) console.log("[MockTest] questions by ids result", { subjectId, ...result });
+    out.push(...((result.data ?? []) as DbQuestion[]));
+  }
+  return out;
+}
+
+export async function fetchSubjectQuestionCount(subjectId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("questions")
+    .select("id", { count: "exact", head: true })
+    .eq("subject_id", subjectId)
+    .eq("status", "published");
+  if (error) console.log("[MockTest] question count result", { subjectId, error });
+  return count ?? 0;
+}
