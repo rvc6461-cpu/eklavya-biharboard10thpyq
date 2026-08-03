@@ -49,6 +49,18 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+function readSavedIds(subjectId: string): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_PREFIX + subjectId);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as SavedState;
+    return Array.isArray(parsed?.order) ? parsed.order.map((o) => o.id) : [];
+  } catch {
+    return [];
+  }
+}
+
 function MockTestLoaderShell() {
   const { subject: subjectId } = Route.useParams();
   const [subject, setSubject] = useState<DbSubject | null>(null);
@@ -65,7 +77,9 @@ function MockTestLoaderShell() {
       if (cancelled) return;
       // Random, duplicate-free selection across every chapter of this subject.
       const uniqueIds = Array.from(new Set(allIds));
-      const picked = shuffle(uniqueIds).slice(0, TARGET);
+      const valid = new Set(uniqueIds);
+      const resumeIds = readSavedIds(subjectId).filter((id) => valid.has(id));
+      const picked = resumeIds.length ? resumeIds : shuffle(uniqueIds).slice(0, TARGET);
       const rows = await fetchSubjectQuestionsByIds(subjectId, picked);
       if (cancelled) return;
       const chapterName = new Map(chapters.map((c) => [c.id, c.name]));
