@@ -36,7 +36,9 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as PracticeSubjectIndexRouteImport } from './routes/practice.$subject.index'
+import { Route as MockTestSubjectIndexRouteImport } from './routes/mock-test.$subject.index'
 import { Route as PracticeSubjectChapterRouteImport } from './routes/practice.$subject.$chapter'
+import { Route as MockTestSubjectTestRouteImport } from './routes/mock-test.$subject.$test'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as PracticeSubjectChapterIndexRouteImport } from './routes/practice.$subject.$chapter.index'
@@ -180,10 +182,20 @@ const PracticeSubjectIndexRoute = PracticeSubjectIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PracticeSubjectRoute,
 } as any)
+const MockTestSubjectIndexRoute = MockTestSubjectIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MockTestSubjectRoute,
+} as any)
 const PracticeSubjectChapterRoute = PracticeSubjectChapterRouteImport.update({
   id: '/$chapter',
   path: '/$chapter',
   getParentRoute: () => PracticeSubjectRoute,
+} as any)
+const MockTestSubjectTestRoute = MockTestSubjectTestRouteImport.update({
+  id: '/$test',
+  path: '/$test',
+  getParentRoute: () => MockTestSubjectRoute,
 } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
@@ -237,14 +249,16 @@ export interface FileRoutesByFullPath {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
-  '/mock-test/$subject': typeof MockTestSubjectRoute
+  '/mock-test/$subject': typeof MockTestSubjectRouteWithChildren
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/mock-test/': typeof MockTestIndexRoute
   '/practice/': typeof PracticeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
+  '/mock-test/$subject/': typeof MockTestSubjectIndexRoute
   '/practice/$subject/': typeof PracticeSubjectIndexRoute
   '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
   '/practice/$subject/group/$subsubject': typeof PracticeSubjectGroupSubsubjectRoute
@@ -269,12 +283,13 @@ export interface FileRoutesByTo {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
-  '/mock-test/$subject': typeof MockTestSubjectRoute
   '/admin': typeof AdminIndexRoute
   '/mock-test': typeof MockTestIndexRoute
   '/practice': typeof PracticeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
+  '/mock-test/$subject': typeof MockTestSubjectIndexRoute
   '/practice/$subject': typeof PracticeSubjectIndexRoute
   '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
   '/practice/$subject/group/$subsubject': typeof PracticeSubjectGroupSubsubjectRoute
@@ -303,14 +318,16 @@ export interface FileRoutesById {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
-  '/mock-test/$subject': typeof MockTestSubjectRoute
+  '/mock-test/$subject': typeof MockTestSubjectRouteWithChildren
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/mock-test/': typeof MockTestIndexRoute
   '/practice/': typeof PracticeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
+  '/mock-test/$subject/': typeof MockTestSubjectIndexRoute
   '/practice/$subject/': typeof PracticeSubjectIndexRoute
   '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
   '/practice/$subject/group/$subsubject': typeof PracticeSubjectGroupSubsubjectRoute
@@ -347,7 +364,9 @@ export interface FileRouteTypes {
     | '/practice/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/mock-test/$subject/$test'
     | '/practice/$subject/$chapter'
+    | '/mock-test/$subject/'
     | '/practice/$subject/'
     | '/practice/$subject/$chapter/$set'
     | '/practice/$subject/group/$subsubject'
@@ -372,12 +391,13 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/sub-subjects'
     | '/admin/subjects'
-    | '/mock-test/$subject'
     | '/admin'
     | '/mock-test'
     | '/practice'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/mock-test/$subject/$test'
+    | '/mock-test/$subject'
     | '/practice/$subject'
     | '/practice/$subject/$chapter/$set'
     | '/practice/$subject/group/$subsubject'
@@ -412,7 +432,9 @@ export interface FileRouteTypes {
     | '/practice/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/mock-test/$subject/$test'
     | '/practice/$subject/$chapter'
+    | '/mock-test/$subject/'
     | '/practice/$subject/'
     | '/practice/$subject/$chapter/$set'
     | '/practice/$subject/group/$subsubject'
@@ -628,12 +650,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PracticeSubjectIndexRouteImport
       parentRoute: typeof PracticeSubjectRoute
     }
+    '/mock-test/$subject/': {
+      id: '/mock-test/$subject/'
+      path: '/'
+      fullPath: '/mock-test/$subject/'
+      preLoaderRoute: typeof MockTestSubjectIndexRouteImport
+      parentRoute: typeof MockTestSubjectRoute
+    }
     '/practice/$subject/$chapter': {
       id: '/practice/$subject/$chapter'
       path: '/$chapter'
       fullPath: '/practice/$subject/$chapter'
       preLoaderRoute: typeof PracticeSubjectChapterRouteImport
       parentRoute: typeof PracticeSubjectRoute
+    }
+    '/mock-test/$subject/$test': {
+      id: '/mock-test/$subject/$test'
+      path: '/$test'
+      fullPath: '/mock-test/$subject/$test'
+      preLoaderRoute: typeof MockTestSubjectTestRouteImport
+      parentRoute: typeof MockTestSubjectRoute
     }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
@@ -699,13 +735,27 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface MockTestSubjectRouteChildren {
+  MockTestSubjectTestRoute: typeof MockTestSubjectTestRoute
+  MockTestSubjectIndexRoute: typeof MockTestSubjectIndexRoute
+}
+
+const MockTestSubjectRouteChildren: MockTestSubjectRouteChildren = {
+  MockTestSubjectTestRoute: MockTestSubjectTestRoute,
+  MockTestSubjectIndexRoute: MockTestSubjectIndexRoute,
+}
+
+const MockTestSubjectRouteWithChildren = MockTestSubjectRoute._addFileChildren(
+  MockTestSubjectRouteChildren,
+)
+
 interface MockTestRouteChildren {
-  MockTestSubjectRoute: typeof MockTestSubjectRoute
+  MockTestSubjectRoute: typeof MockTestSubjectRouteWithChildren
   MockTestIndexRoute: typeof MockTestIndexRoute
 }
 
 const MockTestRouteChildren: MockTestRouteChildren = {
-  MockTestSubjectRoute: MockTestSubjectRoute,
+  MockTestSubjectRoute: MockTestSubjectRouteWithChildren,
   MockTestIndexRoute: MockTestIndexRoute,
 }
 
