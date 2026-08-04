@@ -105,10 +105,10 @@ function SubjectMockList() {
               <p className="mt-2 text-[11px] text-muted-foreground">No attempts yet. Start your first mock test.</p>
             ) : (
               <div className="mt-3 space-y-2">
-                {history.map((h, i) => (
+                {history.map((h) => (
                   <div key={h.id} className="flex items-center justify-between text-[11px]">
                     <span className="text-muted-foreground">
-                      Mock Test {h.testNo} · Attempt {history.filter((x) => x.testNo === h.testNo).length - history.filter((x, j) => x.testNo === h.testNo && j < i).length}
+                      Mock Test {h.testNo} · Attempt {history.filter((x) => x.testNo === h.testNo && x.at <= h.at).length}
                     </span>
                     <span className="font-display font-bold tabular-nums">
                       {h.score}/{h.total} · {Math.round(h.accuracy)}% · {fmtTime(h.timeTakenSeconds)}
