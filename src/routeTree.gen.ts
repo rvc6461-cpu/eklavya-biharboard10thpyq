@@ -42,6 +42,7 @@ import { Route as MockTestSubjectIndexRouteImport } from './routes/mock-test.$su
 import { Route as LibraryNotesIndexRouteImport } from './routes/library.notes.index'
 import { Route as PracticeSubjectChapterRouteImport } from './routes/practice.$subject.$chapter'
 import { Route as MockTestSubjectTestRouteImport } from './routes/mock-test.$subject.$test'
+import { Route as LibraryViewIdRouteImport } from './routes/library.view.$id'
 import { Route as LibraryPapersSubjectRouteImport } from './routes/library.papers.$subject'
 import { Route as LibraryNotesSubjectRouteImport } from './routes/library.notes.$subject'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -217,6 +218,11 @@ const MockTestSubjectTestRoute = MockTestSubjectTestRouteImport.update({
   path: '/$test',
   getParentRoute: () => MockTestSubjectRoute,
 } as any)
+const LibraryViewIdRoute = LibraryViewIdRouteImport.update({
+  id: '/library/view/$id',
+  path: '/library/view/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LibraryPapersSubjectRoute = LibraryPapersSubjectRouteImport.update({
   id: '/library/papers/$subject',
   path: '/library/papers/$subject',
@@ -290,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/library/notes/$subject': typeof LibraryNotesSubjectRoute
   '/library/papers/$subject': typeof LibraryPapersSubjectRoute
+  '/library/view/$id': typeof LibraryViewIdRoute
   '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
   '/library/notes/': typeof LibraryNotesIndexRoute
@@ -327,6 +334,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/library/notes/$subject': typeof LibraryNotesSubjectRoute
   '/library/papers/$subject': typeof LibraryPapersSubjectRoute
+  '/library/view/$id': typeof LibraryViewIdRoute
   '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
   '/library/notes': typeof LibraryNotesIndexRoute
   '/mock-test/$subject': typeof MockTestSubjectIndexRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/library/notes/$subject': typeof LibraryNotesSubjectRoute
   '/library/papers/$subject': typeof LibraryPapersSubjectRoute
+  '/library/view/$id': typeof LibraryViewIdRoute
   '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
   '/library/notes/': typeof LibraryNotesIndexRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/library/notes/$subject'
     | '/library/papers/$subject'
+    | '/library/view/$id'
     | '/mock-test/$subject/$test'
     | '/practice/$subject/$chapter'
     | '/library/notes/'
@@ -450,6 +460,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/library/notes/$subject'
     | '/library/papers/$subject'
+    | '/library/view/$id'
     | '/mock-test/$subject/$test'
     | '/library/notes'
     | '/mock-test/$subject'
@@ -491,6 +502,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/library/notes/$subject'
     | '/library/papers/$subject'
+    | '/library/view/$id'
     | '/mock-test/$subject/$test'
     | '/practice/$subject/$chapter'
     | '/library/notes/'
@@ -521,6 +533,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LibraryNotesSubjectRoute: typeof LibraryNotesSubjectRoute
   LibraryPapersSubjectRoute: typeof LibraryPapersSubjectRoute
+  LibraryViewIdRoute: typeof LibraryViewIdRoute
   LibraryNotesIndexRoute: typeof LibraryNotesIndexRoute
 }
 
@@ -757,6 +770,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MockTestSubjectTestRouteImport
       parentRoute: typeof MockTestSubjectRoute
     }
+    '/library/view/$id': {
+      id: '/library/view/$id'
+      path: '/library/view/$id'
+      fullPath: '/library/view/$id'
+      preLoaderRoute: typeof LibraryViewIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/library/papers/$subject': {
       id: '/library/papers/$subject'
       path: '/library/papers/$subject'
@@ -930,6 +950,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LibraryNotesSubjectRoute: LibraryNotesSubjectRoute,
   LibraryPapersSubjectRoute: LibraryPapersSubjectRoute,
+  LibraryViewIdRoute: LibraryViewIdRoute,
   LibraryNotesIndexRoute: LibraryNotesIndexRoute,
 }
 export const routeTree = rootRouteImport
