@@ -22,9 +22,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PracticeIndexRouteImport } from './routes/practice.index'
 import { Route as MockTestIndexRouteImport } from './routes/mock-test.index'
+import { Route as LibraryIndexRouteImport } from './routes/library.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PracticeSubjectRouteImport } from './routes/practice.$subject'
 import { Route as MockTestSubjectRouteImport } from './routes/mock-test.$subject'
+import { Route as LibraryFormulasRouteImport } from './routes/library.formulas'
 import { Route as AdminSubjectsRouteImport } from './routes/admin.subjects'
 import { Route as AdminSubSubjectsRouteImport } from './routes/admin.sub-subjects'
 import { Route as AdminQuestionsRouteImport } from './routes/admin.questions'
@@ -37,8 +39,12 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as PracticeSubjectIndexRouteImport } from './routes/practice.$subject.index'
 import { Route as MockTestSubjectIndexRouteImport } from './routes/mock-test.$subject.index'
+import { Route as LibraryNotesIndexRouteImport } from './routes/library.notes.index'
 import { Route as PracticeSubjectChapterRouteImport } from './routes/practice.$subject.$chapter'
 import { Route as MockTestSubjectTestRouteImport } from './routes/mock-test.$subject.$test'
+import { Route as LibraryViewIdRouteImport } from './routes/library.view.$id'
+import { Route as LibraryPapersSubjectRouteImport } from './routes/library.papers.$subject'
+import { Route as LibraryNotesSubjectRouteImport } from './routes/library.notes.$subject'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as PracticeSubjectChapterIndexRouteImport } from './routes/practice.$subject.$chapter.index'
@@ -110,6 +116,11 @@ const MockTestIndexRoute = MockTestIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MockTestRoute,
 } as any)
+const LibraryIndexRoute = LibraryIndexRouteImport.update({
+  id: '/library/',
+  path: '/library/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -124,6 +135,11 @@ const MockTestSubjectRoute = MockTestSubjectRouteImport.update({
   id: '/$subject',
   path: '/$subject',
   getParentRoute: () => MockTestRoute,
+} as any)
+const LibraryFormulasRoute = LibraryFormulasRouteImport.update({
+  id: '/library/formulas',
+  path: '/library/formulas',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSubjectsRoute = AdminSubjectsRouteImport.update({
   id: '/subjects',
@@ -187,6 +203,11 @@ const MockTestSubjectIndexRoute = MockTestSubjectIndexRouteImport.update({
   path: '/',
   getParentRoute: () => MockTestSubjectRoute,
 } as any)
+const LibraryNotesIndexRoute = LibraryNotesIndexRouteImport.update({
+  id: '/library/notes/',
+  path: '/library/notes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PracticeSubjectChapterRoute = PracticeSubjectChapterRouteImport.update({
   id: '/$chapter',
   path: '/$chapter',
@@ -196,6 +217,21 @@ const MockTestSubjectTestRoute = MockTestSubjectTestRouteImport.update({
   id: '/$test',
   path: '/$test',
   getParentRoute: () => MockTestSubjectRoute,
+} as any)
+const LibraryViewIdRoute = LibraryViewIdRouteImport.update({
+  id: '/library/view/$id',
+  path: '/library/view/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryPapersSubjectRoute = LibraryPapersSubjectRouteImport.update({
+  id: '/library/papers/$subject',
+  path: '/library/papers/$subject',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryNotesSubjectRoute = LibraryNotesSubjectRouteImport.update({
+  id: '/library/notes/$subject',
+  path: '/library/notes/$subject',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
@@ -249,15 +285,21 @@ export interface FileRoutesByFullPath {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
+  '/library/formulas': typeof LibraryFormulasRoute
   '/mock-test/$subject': typeof MockTestSubjectRouteWithChildren
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/library/': typeof LibraryIndexRoute
   '/mock-test/': typeof MockTestIndexRoute
   '/practice/': typeof PracticeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/library/notes/$subject': typeof LibraryNotesSubjectRoute
+  '/library/papers/$subject': typeof LibraryPapersSubjectRoute
+  '/library/view/$id': typeof LibraryViewIdRoute
   '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
+  '/library/notes/': typeof LibraryNotesIndexRoute
   '/mock-test/$subject/': typeof MockTestSubjectIndexRoute
   '/practice/$subject/': typeof PracticeSubjectIndexRoute
   '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
@@ -283,12 +325,18 @@ export interface FileRoutesByTo {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
+  '/library/formulas': typeof LibraryFormulasRoute
   '/admin': typeof AdminIndexRoute
+  '/library': typeof LibraryIndexRoute
   '/mock-test': typeof MockTestIndexRoute
   '/practice': typeof PracticeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/library/notes/$subject': typeof LibraryNotesSubjectRoute
+  '/library/papers/$subject': typeof LibraryPapersSubjectRoute
+  '/library/view/$id': typeof LibraryViewIdRoute
   '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
+  '/library/notes': typeof LibraryNotesIndexRoute
   '/mock-test/$subject': typeof MockTestSubjectIndexRoute
   '/practice/$subject': typeof PracticeSubjectIndexRoute
   '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
@@ -318,15 +366,21 @@ export interface FileRoutesById {
   '/admin/questions': typeof AdminQuestionsRoute
   '/admin/sub-subjects': typeof AdminSubSubjectsRoute
   '/admin/subjects': typeof AdminSubjectsRoute
+  '/library/formulas': typeof LibraryFormulasRoute
   '/mock-test/$subject': typeof MockTestSubjectRouteWithChildren
   '/practice/$subject': typeof PracticeSubjectRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/library/': typeof LibraryIndexRoute
   '/mock-test/': typeof MockTestIndexRoute
   '/practice/': typeof PracticeIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/library/notes/$subject': typeof LibraryNotesSubjectRoute
+  '/library/papers/$subject': typeof LibraryPapersSubjectRoute
+  '/library/view/$id': typeof LibraryViewIdRoute
   '/mock-test/$subject/$test': typeof MockTestSubjectTestRoute
   '/practice/$subject/$chapter': typeof PracticeSubjectChapterRouteWithChildren
+  '/library/notes/': typeof LibraryNotesIndexRoute
   '/mock-test/$subject/': typeof MockTestSubjectIndexRoute
   '/practice/$subject/': typeof PracticeSubjectIndexRoute
   '/practice/$subject/$chapter/$set': typeof PracticeSubjectChapterSetRoute
@@ -357,15 +411,21 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/sub-subjects'
     | '/admin/subjects'
+    | '/library/formulas'
     | '/mock-test/$subject'
     | '/practice/$subject'
     | '/admin/'
+    | '/library/'
     | '/mock-test/'
     | '/practice/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/library/notes/$subject'
+    | '/library/papers/$subject'
+    | '/library/view/$id'
     | '/mock-test/$subject/$test'
     | '/practice/$subject/$chapter'
+    | '/library/notes/'
     | '/mock-test/$subject/'
     | '/practice/$subject/'
     | '/practice/$subject/$chapter/$set'
@@ -391,12 +451,18 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/sub-subjects'
     | '/admin/subjects'
+    | '/library/formulas'
     | '/admin'
+    | '/library'
     | '/mock-test'
     | '/practice'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/library/notes/$subject'
+    | '/library/papers/$subject'
+    | '/library/view/$id'
     | '/mock-test/$subject/$test'
+    | '/library/notes'
     | '/mock-test/$subject'
     | '/practice/$subject'
     | '/practice/$subject/$chapter/$set'
@@ -425,15 +491,21 @@ export interface FileRouteTypes {
     | '/admin/questions'
     | '/admin/sub-subjects'
     | '/admin/subjects'
+    | '/library/formulas'
     | '/mock-test/$subject'
     | '/practice/$subject'
     | '/admin/'
+    | '/library/'
     | '/mock-test/'
     | '/practice/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/library/notes/$subject'
+    | '/library/papers/$subject'
+    | '/library/view/$id'
     | '/mock-test/$subject/$test'
     | '/practice/$subject/$chapter'
+    | '/library/notes/'
     | '/mock-test/$subject/'
     | '/practice/$subject/'
     | '/practice/$subject/$chapter/$set'
@@ -455,8 +527,14 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  LibraryFormulasRoute: typeof LibraryFormulasRoute
+  LibraryIndexRoute: typeof LibraryIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  LibraryNotesSubjectRoute: typeof LibraryNotesSubjectRoute
+  LibraryPapersSubjectRoute: typeof LibraryPapersSubjectRoute
+  LibraryViewIdRoute: typeof LibraryViewIdRoute
+  LibraryNotesIndexRoute: typeof LibraryNotesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -552,6 +630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MockTestIndexRouteImport
       parentRoute: typeof MockTestRoute
     }
+    '/library/': {
+      id: '/library/'
+      path: '/library'
+      fullPath: '/library/'
+      preLoaderRoute: typeof LibraryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -572,6 +657,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/mock-test/$subject'
       preLoaderRoute: typeof MockTestSubjectRouteImport
       parentRoute: typeof MockTestRoute
+    }
+    '/library/formulas': {
+      id: '/library/formulas'
+      path: '/library/formulas'
+      fullPath: '/library/formulas'
+      preLoaderRoute: typeof LibraryFormulasRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/subjects': {
       id: '/admin/subjects'
@@ -657,6 +749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MockTestSubjectIndexRouteImport
       parentRoute: typeof MockTestSubjectRoute
     }
+    '/library/notes/': {
+      id: '/library/notes/'
+      path: '/library/notes'
+      fullPath: '/library/notes/'
+      preLoaderRoute: typeof LibraryNotesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/practice/$subject/$chapter': {
       id: '/practice/$subject/$chapter'
       path: '/$chapter'
@@ -670,6 +769,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/mock-test/$subject/$test'
       preLoaderRoute: typeof MockTestSubjectTestRouteImport
       parentRoute: typeof MockTestSubjectRoute
+    }
+    '/library/view/$id': {
+      id: '/library/view/$id'
+      path: '/library/view/$id'
+      fullPath: '/library/view/$id'
+      preLoaderRoute: typeof LibraryViewIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library/papers/$subject': {
+      id: '/library/papers/$subject'
+      path: '/library/papers/$subject'
+      fullPath: '/library/papers/$subject'
+      preLoaderRoute: typeof LibraryPapersSubjectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library/notes/$subject': {
+      id: '/library/notes/$subject'
+      path: '/library/notes/$subject'
+      fullPath: '/library/notes/$subject'
+      preLoaderRoute: typeof LibraryNotesSubjectRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
@@ -824,8 +944,14 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  LibraryFormulasRoute: LibraryFormulasRoute,
+  LibraryIndexRoute: LibraryIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  LibraryNotesSubjectRoute: LibraryNotesSubjectRoute,
+  LibraryPapersSubjectRoute: LibraryPapersSubjectRoute,
+  LibraryViewIdRoute: LibraryViewIdRoute,
+  LibraryNotesIndexRoute: LibraryNotesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

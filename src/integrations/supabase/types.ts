@@ -293,10 +293,12 @@ export type Database = {
           is_premium: boolean
           is_published: boolean
           pdf_url: string
+          resource_type: Database["public"]["Enums"]["resource_type"]
           subject_id: string | null
           title: string
           updated_at: string
           uploaded_by: string | null
+          year: number | null
         }
         Insert: {
           chapter_id?: string | null
@@ -307,10 +309,12 @@ export type Database = {
           is_premium?: boolean
           is_published?: boolean
           pdf_url: string
+          resource_type?: Database["public"]["Enums"]["resource_type"]
           subject_id?: string | null
           title: string
           updated_at?: string
           uploaded_by?: string | null
+          year?: number | null
         }
         Update: {
           chapter_id?: string | null
@@ -321,10 +325,12 @@ export type Database = {
           is_premium?: boolean
           is_published?: boolean
           pdf_url?: string
+          resource_type?: Database["public"]["Enums"]["resource_type"]
           subject_id?: string | null
           title?: string
           updated_at?: string
           uploaded_by?: string | null
+          year?: number | null
         }
         Relationships: [
           {
@@ -649,6 +655,7 @@ export type Database = {
       app_role: "admin" | "moderator" | "user"
       question_difficulty: "easy" | "medium" | "hard"
       question_status: "draft" | "published"
+      resource_type: "pyq_paper" | "formula_sheet" | "premium_note"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -779,6 +786,7 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       question_difficulty: ["easy", "medium", "hard"],
       question_status: ["draft", "published"],
+      resource_type: ["pyq_paper", "formula_sheet", "premium_note"],
     },
   },
 } as const
