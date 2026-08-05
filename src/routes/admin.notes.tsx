@@ -15,12 +15,21 @@ type Note = {
   download_count: number; created_at: string;
 };
 
+const RESOURCE_TYPES = [
+  { value: "pyq_paper", label: "Previous Year Paper" },
+  { value: "formula_sheet", label: "Formula Sheet" },
+  { value: "premium_note", label: "Premium Notes" },
+] as const;
+const YEARS = [2026, 2025, 2024, 2023, 2022, 2021];
+
 function NotesAdmin() {
   const [subjects, setSubjects] = useState<any[]>([]);
   const [chapters, setChapters] = useState<any[]>([]);
   const [rows, setRows] = useState<Note[] | null>(null);
   const [form, setForm] = useState({
     title: "", description: "", subject_id: "", chapter_id: "",
+    resource_type: "pyq_paper" as "pyq_paper" | "formula_sheet" | "premium_note",
+    year: "" as string,
     is_premium: false, is_published: true, file: null as File | null,
   });
   const [uploading, setUploading] = useState(false);
