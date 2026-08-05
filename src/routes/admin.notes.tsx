@@ -53,10 +53,15 @@ function NotesAdmin() {
       if (up.error) throw up.error;
       await supabase.from("notes").insert({
         title: form.title, description: form.description || null,
-        subject_id: form.subject_id || null, chapter_id: form.chapter_id || null,
-        pdf_url: path, is_premium: form.is_premium, is_published: form.is_published,
+        subject_id: form.subject_id || null,
+        chapter_id: form.resource_type === "premium_note" ? form.chapter_id || null : null,
+        resource_type: form.resource_type,
+        year: form.resource_type === "pyq_paper" && form.year ? Number(form.year) : null,
+        pdf_url: path,
+        is_premium: form.resource_type === "premium_note" ? true : form.is_premium,
+        is_published: form.is_published,
       });
-      setForm({ title: "", description: "", subject_id: "", chapter_id: "", is_premium: false, is_published: true, file: null });
+      setForm({ title: "", description: "", subject_id: "", chapter_id: "", resource_type: "pyq_paper", year: "", is_premium: false, is_published: true, file: null });
       load();
     } catch (e: any) { alert("Upload failed: " + e.message); }
     finally { setUploading(false); }
