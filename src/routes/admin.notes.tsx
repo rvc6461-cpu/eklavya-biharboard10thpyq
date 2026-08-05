@@ -86,14 +86,25 @@ function NotesAdmin() {
           <h2 className="font-display font-bold">Upload PDF</h2>
           <input className="input" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <textarea className="input" placeholder="Description" rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <select className="input" value={form.resource_type} onChange={(e) => setForm({ ...form, resource_type: e.target.value as typeof form.resource_type, chapter_id: "", year: "" })}>
+            {RESOURCE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
           <select className="input" value={form.subject_id} onChange={(e) => setForm({ ...form, subject_id: e.target.value, chapter_id: "" })}>
             <option value="">Subject (optional)</option>
             {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
-          <select className="input" value={form.chapter_id} onChange={(e) => setForm({ ...form, chapter_id: e.target.value })} disabled={!form.subject_id}>
-            <option value="">Chapter (optional)</option>
-            {chapters.filter((c) => c.subject_id === form.subject_id).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          {form.resource_type === "pyq_paper" && (
+            <select className="input" value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })}>
+              <option value="">Year</option>
+              {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          )}
+          {form.resource_type === "premium_note" && (
+            <select className="input" value={form.chapter_id} onChange={(e) => setForm({ ...form, chapter_id: e.target.value })} disabled={!form.subject_id}>
+              <option value="">Chapter</option>
+              {chapters.filter((c) => c.subject_id === form.subject_id).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          )}
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_premium} onChange={(e) => setForm({ ...form, is_premium: e.target.checked })} /> Premium (paid users only)</label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} /> Published</label>
           <label className="block">
