@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useAuth, useProfile } from "@/hooks/useAuth";
 import { useLiveStats } from "@/hooks/useLiveStats";
+import { usePyqStore } from "@/lib/pyq/store";
+import { DAILY_GOALS, getDailyGoal, setDailyGoal, streakSummary, todayCount } from "@/lib/pyq/smart";
 import {
   BookOpen,
   FileText,
@@ -51,6 +54,7 @@ function Home() {
         <main className="space-y-6 px-5">
           <HeroCard />
           <StatsRow />
+          <DailyGoalCard />
           <ContinueCard />
           <SectionTitle title="Subjects" action="View all" />
           <Subjects />
@@ -254,7 +258,7 @@ const TOOLS: Tool[] = [
   { icon: FileText, label: "PYQ Papers", sub: "PDF library", tint: "text-sky-300", bg: "bg-sky-500/15", to: "/library" },
   { icon: Sparkles, label: "Formula Sheet", sub: "Quick revision", tint: "text-amber-300", bg: "bg-amber-500/15", to: "/library/formulas" },
   { icon: NotebookPen, label: "Mistake Book", sub: "Learn from errors", tint: "text-rose-300", bg: "bg-rose-500/15", to: "/mistakes" },
-  { icon: LineChart, label: "Analytics", sub: "Track progress", tint: "text-violet-300", bg: "bg-violet-500/15" },
+  { icon: LineChart, label: "Analytics", sub: "Track progress", tint: "text-violet-300", bg: "bg-violet-500/15", to: "/analytics" },
 ];
 
 function ToolsGrid() {
@@ -334,18 +338,23 @@ function RecommendationCard() {
 }
 
 function StreakCard() {
+  const { state } = usePyqStore();
+  const streak = streakSummary(state.attemptLog);
   const days = ["M", "T", "W", "T", "F", "S", "S"];
-  const done = [true, true, true, true, false, false, false];
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  const done = days.map((_d, i) => { const date = new Date(monday); date.setDate(monday.getDate() + i); return streak.active.has(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`); });
   return (
     <div className="bg-gradient-card rounded-2xl border border-border p-4">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <p className="font-display text-sm font-bold">This week</p>
-          <p className="text-[11px] text-muted-foreground">4 of 7 days · keep going</p>
+           <p className="text-[11px] text-muted-foreground">{streak.weekly} of 7 days · keep going</p>
         </div>
         <div className="flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-1">
           <Flame className="h-3.5 w-3.5 text-gold" />
-          <span className="text-xs font-bold text-gold">12</span>
+          <span className="text-xs font-bold text-gold">{streak.daily}</span>
         </div>
       </div>
       <div className="flex justify-between">
@@ -368,12 +377,21 @@ function StreakCard() {
   );
 }
 
+function DailyGoalCard() {
+  const { state } = usePyqStore();
+  const [goal, setGoalState] = useState(20);
+  useEffect(() => { setGoalState(getDailyGoal()); }, []);
+  const solved = todayCount(state.attemptLog);
+  const pct = Math.min(100, Math.round(solved / goal * 100));
+  return <div className="bg-gradient-card rounded-2xl border border-border p-4"><div className="flex items-center justify-between"><div><p className="font-display text-sm font-bold">Daily goal</p><p className="text-[11px] text-muted-foreground">{solved} of {goal} questions today</p></div><span className="font-display text-lg font-bold text-primary">{pct}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="bg-gradient-primary h-full rounded-full transition-all" style={{ width: `${pct}%` }} /></div><div className="mt-3 grid grid-cols-3 gap-2">{DAILY_GOALS.map((value) => <button key={value} onClick={() => { setDailyGoal(value); setGoalState(value); }} className={`rounded-xl py-2 text-xs font-bold ${goal === value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{value}/day</button>)}</div></div>;
+}
+
 function BottomNav() {
   const items = [
     { icon: GraduationCap, label: "Home", active: true, to: "/" },
     { icon: BookOpen, label: "Practice", to: "/practice" },
-    { icon: FlaskConical, label: "Mock", to: "/" },
-    { icon: LineChart, label: "Stats", to: "/" },
+    { icon: FlaskConical, label: "Mock", to: "/mock-test" },
+    { icon: LineChart, label: "Stats", to: "/analytics" },
   ];
   return (
     <nav className="fixed right-0 bottom-0 left-0 z-50 mx-auto max-w-md px-5 pb-5">

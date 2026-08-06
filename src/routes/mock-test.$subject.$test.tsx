@@ -480,8 +480,6 @@ function Row({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-type ReviewFilter = "all" | "correct" | "wrong" | "unanswered";
-
 function MockResults({
   questions, answers, subject, testNo, timeTakenSec, onRetake, onRandom,
 }: {
@@ -638,6 +636,35 @@ function MockResults({
         </Link>
       </div>
     </div>
+  );
+}
+
+function AnswerReview({ questions, answers, subjectName, onExit }: {
+  questions: QuizQ[]; answers: Record<number, number>; subjectName: string; onExit: () => void;
+}) {
+  const [index, setIndex] = useState(0);
+  const [palette, setPalette] = useState(false);
+  const { state, toggleBookmark } = usePyqStore();
+  const q = questions[index];
+  if (!q) return null;
+  const selected = answers[index];
+  const status = selected == null ? "Not attempted" : selected === q.answer ? "Correct" : "Wrong";
+  return (
+    <div className="min-h-screen bg-background pb-28 text-foreground"><div className="mx-auto max-w-md">
+      <header className="flex items-center justify-between gap-2 px-5 pt-6 pb-4">
+        <button onClick={onExit} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Back to result"><ArrowLeft className="h-5 w-5" /></button>
+        <div className="min-w-0 text-center"><p className="truncate text-[10px] text-muted-foreground">{subjectName} · ANSWER REVIEW</p><p className="font-display text-sm font-bold">Question {index + 1} of {questions.length}</p></div>
+        <button onClick={() => toggleBookmark(q.id)} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Bookmark question">{state.bookmarks.includes(q.id) ? <BookmarkCheck className="h-5 w-5 text-gold" /> : <Bookmark className="h-5 w-5 text-muted-foreground" />}</button>
+      </header>
+      <div className="px-5"><div className="flex items-center justify-between text-[11px]"><span className={status === "Correct" ? "text-success" : status === "Wrong" ? "text-destructive" : "text-muted-foreground"}>{status}</span><button onClick={() => setPalette((v) => !v)} className="rounded-full bg-primary/15 px-3 py-1 font-bold text-primary">Question Palette</button></div></div>
+      {palette && <div className="mx-5 mt-3 rounded-2xl border border-border bg-card p-3"><div className="grid grid-cols-8 gap-2">{questions.map((question, i) => { const answer = answers[i]; const cls = i === index ? "ring-2 ring-primary" : ""; const tone = answer == null ? "bg-muted text-muted-foreground" : answer === question.answer ? "bg-success text-success-foreground" : "bg-destructive text-destructive-foreground"; return <button key={question.id} onClick={() => { setIndex(i); setPalette(false); }} className={`h-8 rounded-lg text-[11px] font-bold ${tone} ${cls}`}>{i + 1}</button>; })}</div><div className="mt-3 flex gap-3 text-[10px] text-muted-foreground"><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-success" />Correct</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-destructive" />Wrong</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-muted" />Not attempted</span></div></div>}
+      <main className="mt-5 space-y-4 px-5">
+        <div className="bg-gradient-card rounded-3xl border border-border p-5"><p className="text-[10px] text-muted-foreground">{q.chapterName}</p><p className="font-display mt-2 font-semibold leading-relaxed">{q.text}</p></div>
+        <div className="space-y-2.5">{q.options.map((option, i) => { const isCorrect = i === q.answer; const isWrong = selected === i && selected !== q.answer; const cls = isCorrect ? "border-success/60 bg-success/15" : isWrong ? "border-destructive/60 bg-destructive/15" : "border-border bg-card opacity-70"; return <div key={i} className={`flex items-center gap-3 rounded-2xl border p-4 ${cls}`}><span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl font-bold ${isCorrect ? "bg-success text-success-foreground" : isWrong ? "bg-destructive text-destructive-foreground" : "bg-muted text-muted-foreground"}`}>{isCorrect ? <Check className="h-4 w-4" /> : isWrong ? <X className="h-4 w-4" /> : String.fromCharCode(65 + i)}</span><span className="text-sm">{option}</span></div>; })}</div>
+        {q.explanation?.trim() && <div className="rounded-2xl border border-border bg-card p-4"><p className="text-[10px] font-bold text-muted-foreground">EXPLANATION</p><p className="mt-2 text-xs leading-relaxed">{q.explanation}</p></div>}
+      </main>
+      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md px-5 pb-5"><div className="flex gap-2"><button disabled={index === 0} onClick={() => setIndex(index - 1)} className="flex flex-1 items-center justify-center gap-1 rounded-2xl border border-border bg-card py-3 font-bold disabled:opacity-40"><ChevronLeft className="h-4 w-4" /> Previous</button><button disabled={index + 1 >= questions.length} onClick={() => setIndex(index + 1)} className="bg-gradient-primary flex flex-1 items-center justify-center gap-1 rounded-2xl py-3 font-bold text-primary-foreground disabled:opacity-40">Next <ChevronRight className="h-4 w-4" /></button></div></div>
+    </div></div>
   );
 }
 
