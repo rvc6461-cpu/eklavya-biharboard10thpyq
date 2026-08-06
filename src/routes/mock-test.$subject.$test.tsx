@@ -36,6 +36,10 @@ export const Route = createFileRoute("/mock-test/$subject/$test")({
     meta: [
       { title: "Full Mock Test · Eklavya" },
       { name: "description", content: "Full-length subject mock test with timer, palette, result analytics and answer review." },
+      { property: "og:title", content: "Full Mock Test · Eklavya" },
+      { property: "og:description", content: "Take a timed Bihar Board subject mock and review your performance." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   errorComponent: () => <div className="p-6 text-center">Something went wrong.</div>,
@@ -522,7 +526,7 @@ function MockResults({
     return <WrongPractice questions={wrongPool} subjectName={subject.name} onExit={() => setPractice(false)} />;
   }
   if (review) {
-    return <AnswerReview questions={questions} answers={answers} subjectName={subject.name} onExit={() => setReview(false)} />;
+    return <AnswerReview questions={questions} answers={answers} subjectId={subject.id} subjectName={subject.name} onExit={() => setReview(false)} />;
   }
 
   const completion = pct >= 90 ? { icon: "🏆", label: "Excellent" }
@@ -634,8 +638,8 @@ function MockResults({
   );
 }
 
-function AnswerReview({ questions, answers, subjectName, onExit }: {
-  questions: QuizQ[]; answers: Record<number, number>; subjectName: string; onExit: () => void;
+function AnswerReview({ questions, answers, subjectId, subjectName, onExit }: {
+  questions: QuizQ[]; answers: Record<number, number>; subjectId: string; subjectName: string; onExit: () => void;
 }) {
   const [index, setIndex] = useState(0);
   const [palette, setPalette] = useState(false);
@@ -649,7 +653,7 @@ function AnswerReview({ questions, answers, subjectName, onExit }: {
       <header className="flex items-center justify-between gap-2 px-5 pt-6 pb-4">
         <button onClick={onExit} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Back to result"><ArrowLeft className="h-5 w-5" /></button>
         <div className="min-w-0 text-center"><p className="truncate text-[10px] text-muted-foreground">{subjectName} · ANSWER REVIEW</p><p className="font-display text-sm font-bold">Question {index + 1} of {questions.length}</p></div>
-        <button onClick={() => toggleBookmark(q.id, { subjectId: q.chapterId ? questions[index].chapterId : "", chapterId: q.chapterId })} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Bookmark question">{state.bookmarks.includes(q.id) ? <BookmarkCheck className="h-5 w-5 text-gold" /> : <Bookmark className="h-5 w-5 text-muted-foreground" />}</button>
+        <button onClick={() => toggleBookmark(q.id, { subjectId, chapterId: q.chapterId })} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Bookmark question">{state.bookmarks.includes(q.id) ? <BookmarkCheck className="h-5 w-5 text-gold" /> : <Bookmark className="h-5 w-5 text-muted-foreground" />}</button>
       </header>
       <div className="px-5"><div className="flex items-center justify-between text-[11px]"><span className={status === "Correct" ? "text-success" : status === "Wrong" ? "text-destructive" : "text-muted-foreground"}>{status}</span><button onClick={() => setPalette((v) => !v)} className="rounded-full bg-primary/15 px-3 py-1 font-bold text-primary">Question Palette</button></div></div>
       {palette && <div className="mx-5 mt-3 rounded-2xl border border-border bg-card p-3"><div className="grid grid-cols-8 gap-2">{questions.map((question, i) => { const answer = answers[i]; const cls = i === index ? "ring-2 ring-primary" : ""; const tone = answer == null ? "bg-muted text-muted-foreground" : answer === question.answer ? "bg-success text-success-foreground" : "bg-destructive text-destructive-foreground"; return <button key={question.id} onClick={() => { setIndex(i); setPalette(false); }} className={`h-8 rounded-lg text-[11px] font-bold ${tone} ${cls}`}>{i + 1}</button>; })}</div><div className="mt-3 flex gap-3 text-[10px] text-muted-foreground"><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-success" />Correct</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-destructive" />Wrong</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-muted" />Not attempted</span></div></div>}
