@@ -8,13 +8,13 @@ import { setCloudUser, mergeOnLogin } from "@/lib/pyq/cloud";
 const LOCAL_KEY = "eklavya:pyq:v1";
 
 function readLocal() {
-  if (typeof window === "undefined") return { attempts: {}, bookmarks: [], mistakes: [] };
+  if (typeof window === "undefined") return { attempts: {}, attemptLog: [], bookmarks: [], mistakes: [], mastered: [] };
   try {
     const raw = window.localStorage.getItem(LOCAL_KEY);
-    if (!raw) return { attempts: {}, bookmarks: [], mistakes: [] };
+    if (!raw) return { attempts: {}, attemptLog: [], bookmarks: [], mistakes: [], mastered: [] };
     return JSON.parse(raw);
   } catch {
-    return { attempts: {}, bookmarks: [], mistakes: [] };
+    return { attempts: {}, attemptLog: [], bookmarks: [], mistakes: [], mastered: [] };
   }
 }
 
