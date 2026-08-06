@@ -82,7 +82,7 @@ export function usePyqStore() {
     pushAttempt(a); // fire-and-forget cloud sync (no-op if signed out)
   }, []);
 
-  const toggleBookmark = useCallback((questionId: string) => {
+  const toggleBookmark = useCallback((questionId: string, location?: { subjectId: string; chapterId: string }) => {
     const next = read();
     const on = !next.bookmarks.includes(questionId);
     next.bookmarks = on
@@ -90,7 +90,7 @@ export function usePyqStore() {
       : next.bookmarks.filter((id) => id !== questionId);
     write(next);
     setState(next); // instant local update
-    pushBookmark(questionId, on);
+    pushBookmark(questionId, on, location);
   }, []);
 
   return { state, recordAttempt, toggleBookmark };

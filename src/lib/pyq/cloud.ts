@@ -46,10 +46,10 @@ export function pushAttempt(a: AttemptRecord) {
   }
 }
 
-export function pushBookmark(questionId: string, on: boolean) {
+export function pushBookmark(questionId: string, on: boolean, location?: { subjectId: string; chapterId: string }) {
   if (!currentUserId) return;
   const uid = currentUserId;
-  const loc = locateQuestion(questionId);
+  const loc = location ?? locateQuestion(questionId);
   if (!loc) return;
   if (on) {
     void supabase.from("bookmarks").insert({
