@@ -518,11 +518,6 @@ function MockResults({
     return sel == null || sel !== questions[i].answer;
   });
 
-  const statusOf = (i: number): ReviewFilter => {
-    const sel = answers[i];
-    if (sel == null) return "unanswered";
-    return sel === questions[i].answer ? "correct" : "wrong";
-  };
   if (practice) {
     return <WrongPractice questions={wrongPool} subjectName={subject.name} onExit={() => setPractice(false)} />;
   }
