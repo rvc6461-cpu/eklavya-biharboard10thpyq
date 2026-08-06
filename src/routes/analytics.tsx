@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BarChart3, Check, X, Target, Timer, Flame, Trophy, Lock, Sparkles } from "lucide-react";
 import { usePyqStore } from "@/lib/pyq/store";
 import { achievements, smartRevision, streakSummary } from "@/lib/pyq/smart";
+import { fetchLookupMaps } from "@/lib/pyq/db";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({ meta: [
@@ -18,6 +19,8 @@ export const Route = createFileRoute("/analytics")({
 
 function AnalyticsPage() {
   const { state } = usePyqStore();
+  const [labels, setLabels] = useState<{ subjects: Record<string, { name: string }>; chapters: Record<string, { name: string }> }>({ subjects: {}, chapters: {} });
+  useEffect(() => { void fetchLookupMaps().then((maps) => setLabels({ subjects: maps.subjects, chapters: maps.chapters })); }, []);
   const log = state.attemptLog;
   const summary = streakSummary(log);
   const correct = log.filter((a) => a.correct).length;
@@ -36,9 +39,9 @@ function AnalyticsPage() {
       <div className="bg-hero rounded-3xl border border-border p-5 shadow-card-premium"><p className="text-[11px] font-bold text-gold">OVERALL ACCURACY</p><div className="mt-2 flex items-end justify-between"><p className="font-display text-5xl font-bold text-gradient-gold">{accuracy}%</p><BarChart3 className="h-10 w-10 text-primary" /></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-muted"><div className="bg-gradient-primary h-full rounded-full" style={{ width: `${accuracy}%` }} /></div></div>
       <div className="grid grid-cols-3 gap-2"><Metric icon={Check} label="Correct" value={correct} tone="text-success" /><Metric icon={X} label="Wrong" value={wrong} tone="text-destructive" /><Metric icon={Target} label="Solved" value={log.length} tone="text-primary" /><Metric icon={Timer} label="Avg / Q" value={`${averageSeconds}s`} tone="text-gold" /><Metric icon={Flame} label="Daily" value={`${summary.daily}d`} tone="text-gold" /><Metric icon={Trophy} label="Best" value={`${summary.best}d`} tone="text-success" /></div>
       <Section title="Progress"><div className="grid grid-cols-2 gap-3"><Progress label="This week" solved={weekly.total} accuracy={weekly.accuracy} /><Progress label="This month" solved={monthly.total} accuracy={monthly.accuracy} /></div><p className="mt-3 text-[11px] text-muted-foreground">Weekly streak {summary.weekly}/7 days · Monthly streak {summary.monthly}/30 days</p></Section>
-      <Section title="Subject-wise accuracy">{Object.entries(bySubject).length ? Object.entries(bySubject).map(([id, row]) => <AccuracyRow key={id} label={`Subject ${short(id)}`} value={row.accuracy} total={row.total} />) : <Empty />}</Section>
-      <Section title="Chapter-wise accuracy">{chapters.length ? chapters.map(([id, row]) => <div key={id} className="mb-3"><AccuracyRow label={`Chapter ${short(id)}`} value={row.accuracy} total={row.total} /><p className={`mt-1 text-[10px] ${row.accuracy < 60 ? "text-destructive" : row.accuracy > 80 ? "text-success" : "text-muted-foreground"}`}><Sparkles className="mr-1 inline h-3 w-3" />{smartRevision(row.accuracy)}</p></div>) : <Empty />}</Section>
-      <div className="grid grid-cols-2 gap-3"><Section title="Weak chapters">{chapters.filter(([, r]) => r.accuracy < 60).slice(0, 4).map(([id, r]) => <p key={id} className="mt-2 text-xs text-destructive">Chapter {short(id)} · {r.accuracy}%</p>)}{!chapters.some(([, r]) => r.accuracy < 60) && <Empty />}</Section><Section title="Strong chapters">{chapters.filter(([, r]) => r.accuracy > 80).slice(0, 4).map(([id, r]) => <p key={id} className="mt-2 text-xs text-success">Chapter {short(id)} · {r.accuracy}%</p>)}{!chapters.some(([, r]) => r.accuracy > 80) && <Empty />}</Section></div>
+      <Section title="Subject-wise accuracy">{Object.entries(bySubject).length ? Object.entries(bySubject).map(([id, row]) => <AccuracyRow key={id} label={labels.subjects[id]?.name ?? `Subject ${short(id)}`} value={row.accuracy} total={row.total} />) : <Empty />}</Section>
+      <Section title="Chapter-wise accuracy">{chapters.length ? chapters.map(([id, row]) => <div key={id} className="mb-3"><AccuracyRow label={labels.chapters[id]?.name ?? `Chapter ${short(id)}`} value={row.accuracy} total={row.total} /><p className={`mt-1 text-[10px] ${row.accuracy < 60 ? "text-destructive" : row.accuracy > 80 ? "text-success" : "text-muted-foreground"}`}><Sparkles className="mr-1 inline h-3 w-3" />{smartRevision(row.accuracy)}</p></div>) : <Empty />}</Section>
+      <div className="grid grid-cols-2 gap-3"><Section title="Weak chapters">{chapters.filter(([, r]) => r.accuracy < 60).slice(0, 4).map(([id, r]) => <p key={id} className="mt-2 text-xs text-destructive">{labels.chapters[id]?.name ?? `Chapter ${short(id)}`} · {r.accuracy}%</p>)}{!chapters.some(([, r]) => r.accuracy < 60) && <Empty />}</Section><Section title="Strong chapters">{chapters.filter(([, r]) => r.accuracy > 80).slice(0, 4).map(([id, r]) => <p key={id} className="mt-2 text-xs text-success">{labels.chapters[id]?.name ?? `Chapter ${short(id)}`} · {r.accuracy}%</p>)}{!chapters.some(([, r]) => r.accuracy > 80) && <Empty />}</Section></div>
       <Section title="Achievement badges"><div className="grid grid-cols-2 gap-2">{badges.map((badge) => <div key={badge.id} className={`rounded-xl border p-3 ${badge.unlocked ? "border-gold/40 bg-gold/10" : "border-border bg-muted/20 opacity-60"}`}><div className="flex items-center gap-2">{badge.unlocked ? <Trophy className="h-4 w-4 text-gold" /> : <Lock className="h-4 w-4 text-muted-foreground" />}<p className="font-display text-xs font-bold">{badge.label}</p></div><p className="mt-1 text-[10px] text-muted-foreground">{badge.detail}</p></div>)}</div></Section>
     </main>
   </div></div>;

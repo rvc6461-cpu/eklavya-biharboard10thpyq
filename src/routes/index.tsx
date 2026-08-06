@@ -4,6 +4,7 @@ import { useAuth, useProfile } from "@/hooks/useAuth";
 import { useLiveStats } from "@/hooks/useLiveStats";
 import { usePyqStore } from "@/lib/pyq/store";
 import { DAILY_GOALS, getDailyGoal, setDailyGoal, streakSummary, todayCount } from "@/lib/pyq/smart";
+import { fetchLookupMaps } from "@/lib/pyq/db";
 import {
   BookOpen,
   FileText,
@@ -316,6 +317,19 @@ function PremiumCard() {
 }
 
 function RecommendationCard() {
+  const { state } = usePyqStore();
+  const [chapterName, setChapterName] = useState("your weakest chapter");
+  const rows = Object.values(state.attempts);
+  const chapterRows = new Map<string, { total: number; correct: number }>();
+  for (const attempt of rows) {
+    const row = chapterRows.get(attempt.chapterId) ?? { total: 0, correct: 0 };
+    row.total += 1;
+    if (attempt.correct) row.correct += 1;
+    chapterRows.set(attempt.chapterId, row);
+  }
+  const weakest = Array.from(chapterRows.entries()).sort((a, b) => a[1].correct / a[1].total - b[1].correct / b[1].total)[0];
+  const accuracy = weakest ? Math.round(weakest[1].correct / weakest[1].total * 100) : 0;
+  useEffect(() => { if (weakest) void fetchLookupMaps().then((maps) => setChapterName(maps.chapters[weakest[0]]?.name ?? "your weakest chapter")); }, [weakest?.[0]]);
   return (
     <div className="bg-gradient-card rounded-2xl border border-border p-4">
       <div className="flex items-center gap-2">
@@ -325,9 +339,7 @@ function RecommendationCard() {
         </p>
       </div>
       <p className="mt-2 text-sm leading-relaxed">
-        Your <span className="font-bold">Algebra</span> accuracy dropped to{" "}
-        <span className="font-bold text-destructive">52%</span>. Revise Ch. 4
-        and retry 10 questions.
+         {weakest ? <><span className="font-bold">{chapterName}</span> accuracy is{" "}<span className={`font-bold ${accuracy < 60 ? "text-destructive" : accuracy > 80 ? "text-success" : "text-primary"}`}>{accuracy}%</span>. {accuracy < 60 ? "Revise this chapter and solve 20 more questions." : accuracy > 80 ? "Excellent! You are ready for the next chapter." : "Keep practising to strengthen this chapter."}</> : <>Complete a practice set to unlock your personalised revision suggestion.</>}
       </p>
       <button
         type="button"
