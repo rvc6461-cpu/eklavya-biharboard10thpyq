@@ -46,10 +46,10 @@ export function pushAttempt(a: AttemptRecord) {
   }
 }
 
-export function pushBookmark(questionId: string, on: boolean) {
+export function pushBookmark(questionId: string, on: boolean, location?: { subjectId: string; chapterId: string }) {
   if (!currentUserId) return;
   const uid = currentUserId;
-  const loc = locateQuestion(questionId);
+  const loc = location ?? locateQuestion(questionId);
   if (!loc) return;
   if (on) {
     void supabase.from("bookmarks").insert({
@@ -128,8 +128,10 @@ export async function mergeOnLogin(
 
   const merged: PyqState = {
     attempts: { ...local.attempts },
+    attemptLog: [...(local.attemptLog ?? Object.values(local.attempts))],
     bookmarks: Array.from(new Set(local.bookmarks)),
     mistakes: Array.from(new Set(local.mistakes)),
+    mastered: [...(local.mastered ?? [])],
   };
 
   // Cloud attempts (latest first): keep the most recent per question.
@@ -145,6 +147,9 @@ export async function mergeOnLogin(
         correct: row.is_correct,
         at: cloudAt,
       };
+      if (!merged.attemptLog.some((a) => a.questionId === row.question_id && a.at === cloudAt)) {
+        merged.attemptLog.push(merged.attempts[row.question_id]);
+      }
     }
   }
 

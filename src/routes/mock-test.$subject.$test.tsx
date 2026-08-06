@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, Flag, Check, X, Timer,
-  Trophy, RotateCcw, AlertTriangle, ListChecks, ArrowRight,
+  Trophy, RotateCcw, AlertTriangle, ListChecks, ArrowRight, Bookmark, BookmarkCheck, Share2, Eye,
 } from "lucide-react";
 import type { Question } from "@/lib/pyq/data";
 import {
@@ -36,6 +36,10 @@ export const Route = createFileRoute("/mock-test/$subject/$test")({
     meta: [
       { title: "Full Mock Test · Eklavya" },
       { name: "description", content: "Full-length subject mock test with timer, palette, result analytics and answer review." },
+      { property: "og:title", content: "Full Mock Test · Eklavya" },
+      { property: "og:description", content: "Take a timed Bihar Board subject mock and review your performance." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   errorComponent: () => <div className="p-6 text-center">Something went wrong.</div>,
@@ -132,7 +136,7 @@ function MockTestRunner({
   subject: DbSubject; testNo: number; pool: QuizQ[]; storageKey: string; onRegenerate: () => void;
 }) {
   const navigate = useNavigate();
-  const { recordAttempt } = usePyqStore();
+  const { state: pyqState, recordAttempt, toggleBookmark } = usePyqStore();
 
   const byId = useMemo(() => new Map(pool.map((q) => [q.id, q])), [pool]);
 
@@ -272,11 +276,15 @@ function MockTestRunner({
     setShowPalette(false);
   };
 
-  const restart = () => {
+  const restart = (random = false) => {
     submittedRef.current = false;
     setSubmitted(false);
     setConfirmOpen(false);
-    onRegenerate();
+    if (random) onRegenerate();
+    else setState({
+      order: state.order.map((o) => ({ ...o })), answers: {}, marked: {}, visited: { 0: true },
+      idx: 0, remaining: TIME_LIMIT_SEC, startedAt: Date.now(),
+    });
   };
 
   const answeredCount = Object.keys(state.answers).length;
@@ -293,7 +301,8 @@ function MockTestRunner({
         subject={subject}
         testNo={testNo}
         timeTakenSec={Math.max(0, TIME_LIMIT_SEC - remaining)}
-        onRetake={restart}
+        onRetake={() => restart(false)}
+        onRandom={() => restart(true)}
       />
     );
   }
@@ -315,6 +324,9 @@ function MockTestRunner({
             </p>
             <p className="truncate font-display text-sm font-bold">Full Mock Test {testNo}</p>
           </div>
+          <button onClick={() => toggleBookmark(question.id, { subjectId: subject.id, chapterId: question.chapterId })} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Bookmark question">
+            {pyqState.bookmarks.includes(question.id) ? <BookmarkCheck className="h-5 w-5 text-gold" /> : <Bookmark className="h-5 w-5 text-muted-foreground" />}
+          </button>
           <div className={`flex items-center gap-1.5 rounded-2xl border px-3 h-10 ${remaining < 300 ? "border-destructive/60 bg-destructive/15 text-destructive" : "border-border bg-card text-foreground"}`}>
             <Timer className="h-4 w-4" />
             <span className="font-display text-sm font-bold tabular-nums">
@@ -472,16 +484,14 @@ function Row({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-type ReviewFilter = "all" | "correct" | "wrong" | "unanswered";
-
 function MockResults({
-  questions, answers, subject, testNo, timeTakenSec, onRetake,
+  questions, answers, subject, testNo, timeTakenSec, onRetake, onRandom,
 }: {
   questions: QuizQ[]; answers: Record<number, number>; subject: DbSubject;
-  testNo: number; timeTakenSec: number; onRetake: () => void;
+  testNo: number; timeTakenSec: number; onRetake: () => void; onRandom: () => void;
 }) {
-  const [filter, setFilter] = useState<ReviewFilter>("all");
   const [practice, setPractice] = useState(false);
+  const [review, setReview] = useState(false);
 
   const total = questions.length;
   let correct = 0, wrong = 0, unanswered = 0;
@@ -512,18 +522,21 @@ function MockResults({
     return sel == null || sel !== questions[i].answer;
   });
 
-  const statusOf = (i: number): ReviewFilter => {
-    const sel = answers[i];
-    if (sel == null) return "unanswered";
-    return sel === questions[i].answer ? "correct" : "wrong";
-  };
-  const reviewList = questions
-    .map((q, i) => ({ q, i, status: statusOf(i) }))
-    .filter((r) => filter === "all" || r.status === filter);
-
   if (practice) {
     return <WrongPractice questions={wrongPool} subjectName={subject.name} onExit={() => setPractice(false)} />;
   }
+  if (review) {
+    return <AnswerReview questions={questions} answers={answers} subjectId={subject.id} subjectName={subject.name} onExit={() => setReview(false)} />;
+  }
+
+  const completion = pct >= 90 ? { icon: "🏆", label: "Excellent" }
+    : pct >= 75 ? { icon: "🥇", label: "Very Good" }
+      : pct >= 60 ? { icon: "🥈", label: "Good" } : { icon: "📘", label: "Needs Improvement" };
+  const shareResult = async () => {
+    const text = `Eklavya Bihar Board 10th PYQ\n${subject.name} · Full Mock Test ${testNo}\nScore: ${correct}/${total}\nAccuracy: ${acc}%\nCorrect: ${correct} · Wrong: ${wrong} · Unanswered: ${unanswered}\nTime: ${mins}m ${secs}s`;
+    if (navigator.share) await navigator.share({ title: "Eklavya Mock Test Result", text });
+    else await navigator.clipboard?.writeText(text);
+  };
 
   return (
     <div className="min-h-screen bg-background px-5 pt-6 pb-10 text-foreground">
@@ -537,6 +550,9 @@ function MockResults({
             <h2 className="font-display mt-4 text-2xl font-bold">{subject.name} · Mock Test {testNo}</h2>
             <p className="font-display mt-2 text-5xl font-bold text-gradient-gold">{pct}%</p>
             <p className="mt-1 text-sm text-muted-foreground">Score {correct} / {total}</p>
+            <div className="mt-4 inline-flex animate-[bounce_900ms_ease-out_1] items-center gap-2 rounded-full border border-gold/30 bg-gold/15 px-4 py-2">
+              <span className="text-xl">{completion.icon}</span><span className="font-display text-sm font-bold text-gold">{completion.label}</span>
+            </div>
           </div>
         </div>
 
@@ -590,76 +606,21 @@ function MockResults({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <p className="font-display text-sm font-bold">Review answers</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {([
-              ["all", `All (${total})`],
-              ["correct", `Correct (${correct})`],
-              ["wrong", `Wrong (${wrong})`],
-              ["unanswered", `Unanswered (${unanswered})`],
-            ] as [ReviewFilter, string][]).map(([key, label]) => (
-              <button key={key} onClick={() => setFilter(key)}
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                  filter === key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                }`}>
-                {label}
-              </button>
-            ))}
-          </div>
+        <button onClick={() => setReview(true)} className="bg-gradient-primary shadow-glow flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-display font-bold text-primary-foreground"><Eye className="h-5 w-5" /> Review Answers</button>
 
-          <div className="mt-4 space-y-3">
-            {reviewList.length === 0 && (
-              <p className="text-[11px] text-muted-foreground">No questions in this filter.</p>
-            )}
-            {reviewList.map(({ q, i, status }) => {
-              const sel = answers[i];
-              const tone = status === "correct"
-                ? "border-success/40 bg-success/5"
-                : status === "wrong" ? "border-destructive/40 bg-destructive/5" : "border-border bg-muted/20";
-              return (
-                <div key={q.id} className={`rounded-2xl border p-3 ${tone}`}>
-                  <div className="flex items-center justify-between text-[10px] uppercase tracking-wide text-muted-foreground">
-                    <span>Q{i + 1} · {q.chapterName}</span>
-                    <span className={`font-bold ${
-                      status === "correct" ? "text-success" : status === "wrong" ? "text-destructive" : "text-muted-foreground"
-                    }`}>
-                      {status === "correct" ? "Correct" : status === "wrong" ? "Wrong" : "Not attempted"}
-                    </span>
-                  </div>
-                  <p className="font-display mt-1.5 text-sm font-semibold leading-relaxed">{q.text}</p>
-                  <div className="mt-2 space-y-1 text-[11px]">
-                    <p className="text-muted-foreground">
-                      Your answer:{" "}
-                      <span className={status === "correct" ? "text-success font-semibold" : status === "wrong" ? "text-destructive font-semibold" : "font-semibold"}>
-                        {sel == null ? "Not attempted" : q.options[sel]}
-                      </span>
-                    </p>
-                    <p className="text-muted-foreground">
-                      Correct answer: <span className="text-success font-semibold">{q.options[q.answer]}</span>
-                    </p>
-                  </div>
-                  {q.explanation?.trim() ? (
-                    <div className="mt-2 rounded-xl bg-card p-2.5">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Explanation</p>
-                      <p className="mt-1 text-[11px] leading-relaxed">{q.explanation}</p>
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <button onClick={() => void shareResult()} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gold/30 bg-gold/10 py-4 font-display font-bold text-gold"><Share2 className="h-5 w-5" /> Share Result</button>
 
         <button onClick={() => setPractice(true)} disabled={wrongPool.length === 0}
           className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card py-4 font-display font-bold disabled:opacity-40">
-          <ListChecks className="h-5 w-5" /> Practice wrong questions ({wrongPool.length})
+          <ListChecks className="h-5 w-5" /> Retry Wrong Questions ({wrongPool.length})
         </button>
 
         <button onClick={onRetake}
           className="bg-gradient-primary shadow-glow flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-display font-bold text-primary-foreground">
-          <RotateCcw className="h-5 w-5" /> Retry same mock
+          <RotateCcw className="h-5 w-5" /> Retry Entire Mock
         </button>
+
+        <button onClick={onRandom} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card py-4 font-display font-bold"><RotateCcw className="h-5 w-5" /> New Random Mock</button>
 
         {testNo < MOCK_TESTS_PER_SUBJECT && (
           <Link to="/mock-test/$subject/$test" params={{ subject: subject.id, test: String(testNo + 1) }}
@@ -674,6 +635,35 @@ function MockResults({
         </Link>
       </div>
     </div>
+  );
+}
+
+function AnswerReview({ questions, answers, subjectId, subjectName, onExit }: {
+  questions: QuizQ[]; answers: Record<number, number>; subjectId: string; subjectName: string; onExit: () => void;
+}) {
+  const [index, setIndex] = useState(0);
+  const [palette, setPalette] = useState(false);
+  const { state, toggleBookmark } = usePyqStore();
+  const q = questions[index];
+  if (!q) return null;
+  const selected = answers[index];
+  const status = selected == null ? "Not attempted" : selected === q.answer ? "Correct" : "Wrong";
+  return (
+    <div className="min-h-screen bg-background pb-28 text-foreground"><div className="mx-auto max-w-md">
+      <header className="flex items-center justify-between gap-2 px-5 pt-6 pb-4">
+        <button onClick={onExit} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Back to result"><ArrowLeft className="h-5 w-5" /></button>
+        <div className="min-w-0 text-center"><p className="truncate text-[10px] text-muted-foreground">{subjectName} · ANSWER REVIEW</p><p className="font-display text-sm font-bold">Question {index + 1} of {questions.length}</p></div>
+        <button onClick={() => toggleBookmark(q.id, { subjectId, chapterId: q.chapterId })} className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Bookmark question">{state.bookmarks.includes(q.id) ? <BookmarkCheck className="h-5 w-5 text-gold" /> : <Bookmark className="h-5 w-5 text-muted-foreground" />}</button>
+      </header>
+      <div className="px-5"><div className="flex items-center justify-between text-[11px]"><span className={status === "Correct" ? "text-success" : status === "Wrong" ? "text-destructive" : "text-muted-foreground"}>{status}</span><button onClick={() => setPalette((v) => !v)} className="rounded-full bg-primary/15 px-3 py-1 font-bold text-primary">Question Palette</button></div></div>
+      {palette && <div className="mx-5 mt-3 rounded-2xl border border-border bg-card p-3"><div className="grid grid-cols-8 gap-2">{questions.map((question, i) => { const answer = answers[i]; const cls = i === index ? "ring-2 ring-primary" : ""; const tone = answer == null ? "bg-muted text-muted-foreground" : answer === question.answer ? "bg-success text-success-foreground" : "bg-destructive text-destructive-foreground"; return <button key={question.id} onClick={() => { setIndex(i); setPalette(false); }} className={`h-8 rounded-lg text-[11px] font-bold ${tone} ${cls}`}>{i + 1}</button>; })}</div><div className="mt-3 flex gap-3 text-[10px] text-muted-foreground"><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-success" />Correct</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-destructive" />Wrong</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-muted" />Not attempted</span></div></div>}
+      <main className="mt-5 space-y-4 px-5">
+        <div className="bg-gradient-card rounded-3xl border border-border p-5"><p className="text-[10px] text-muted-foreground">{q.chapterName}</p><p className="font-display mt-2 font-semibold leading-relaxed">{q.text}</p></div>
+        <div className="space-y-2.5">{q.options.map((option, i) => { const isCorrect = i === q.answer; const isWrong = selected === i && selected !== q.answer; const cls = isCorrect ? "border-success/60 bg-success/15" : isWrong ? "border-destructive/60 bg-destructive/15" : "border-border bg-card opacity-70"; return <div key={i} className={`flex items-center gap-3 rounded-2xl border p-4 ${cls}`}><span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl font-bold ${isCorrect ? "bg-success text-success-foreground" : isWrong ? "bg-destructive text-destructive-foreground" : "bg-muted text-muted-foreground"}`}>{isCorrect ? <Check className="h-4 w-4" /> : isWrong ? <X className="h-4 w-4" /> : String.fromCharCode(65 + i)}</span><span className="text-sm">{option}</span></div>; })}</div>
+        {q.explanation?.trim() && <div className="rounded-2xl border border-border bg-card p-4"><p className="text-[10px] font-bold text-muted-foreground">EXPLANATION</p><p className="mt-2 text-xs leading-relaxed">{q.explanation}</p></div>}
+      </main>
+      <div className="fixed inset-x-0 bottom-0 mx-auto max-w-md px-5 pb-5"><div className="flex gap-2"><button disabled={index === 0} onClick={() => setIndex(index - 1)} className="flex flex-1 items-center justify-center gap-1 rounded-2xl border border-border bg-card py-3 font-bold disabled:opacity-40"><ChevronLeft className="h-4 w-4" /> Previous</button><button disabled={index + 1 >= questions.length} onClick={() => setIndex(index + 1)} className="bg-gradient-primary flex flex-1 items-center justify-center gap-1 rounded-2xl py-3 font-bold text-primary-foreground disabled:opacity-40">Next <ChevronRight className="h-4 w-4" /></button></div></div>
+    </div></div>
   );
 }
 

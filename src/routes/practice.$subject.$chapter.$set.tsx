@@ -142,7 +142,7 @@ function PracticeSetSession() {
             <Shuffle className="h-5 w-5" />
           </button>
           <button
-            onClick={() => toggleBookmark(question.id)}
+             onClick={() => toggleBookmark(question.id, { subjectId: subject.id, chapterId: chapter.id })}
             className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-card"
             aria-label="Bookmark"
           >

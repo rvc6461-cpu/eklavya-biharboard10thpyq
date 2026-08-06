@@ -1,6 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useAuth, useProfile } from "@/hooks/useAuth";
 import { useLiveStats } from "@/hooks/useLiveStats";
+import { usePyqStore } from "@/lib/pyq/store";
+import { DAILY_GOALS, getDailyGoal, setDailyGoal, streakSummary, todayCount } from "@/lib/pyq/smart";
+import { fetchLookupMaps } from "@/lib/pyq/db";
 import {
   BookOpen,
   FileText,
@@ -36,6 +40,8 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "No Distraction. Just Practice. Improve Every Day.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Home,
@@ -51,6 +57,7 @@ function Home() {
         <main className="space-y-6 px-5">
           <HeroCard />
           <StatsRow />
+          <DailyGoalCard />
           <ContinueCard />
           <SectionTitle title="Subjects" action="View all" />
           <Subjects />
@@ -254,7 +261,7 @@ const TOOLS: Tool[] = [
   { icon: FileText, label: "PYQ Papers", sub: "PDF library", tint: "text-sky-300", bg: "bg-sky-500/15", to: "/library" },
   { icon: Sparkles, label: "Formula Sheet", sub: "Quick revision", tint: "text-amber-300", bg: "bg-amber-500/15", to: "/library/formulas" },
   { icon: NotebookPen, label: "Mistake Book", sub: "Learn from errors", tint: "text-rose-300", bg: "bg-rose-500/15", to: "/mistakes" },
-  { icon: LineChart, label: "Analytics", sub: "Track progress", tint: "text-violet-300", bg: "bg-violet-500/15" },
+  { icon: LineChart, label: "Analytics", sub: "Track progress", tint: "text-violet-300", bg: "bg-violet-500/15", to: "/analytics" },
 ];
 
 function ToolsGrid() {
@@ -310,6 +317,19 @@ function PremiumCard() {
 }
 
 function RecommendationCard() {
+  const { state } = usePyqStore();
+  const [chapterName, setChapterName] = useState("your weakest chapter");
+  const rows = Object.values(state.attempts);
+  const chapterRows = new Map<string, { total: number; correct: number }>();
+  for (const attempt of rows) {
+    const row = chapterRows.get(attempt.chapterId) ?? { total: 0, correct: 0 };
+    row.total += 1;
+    if (attempt.correct) row.correct += 1;
+    chapterRows.set(attempt.chapterId, row);
+  }
+  const weakest = Array.from(chapterRows.entries()).sort((a, b) => a[1].correct / a[1].total - b[1].correct / b[1].total)[0];
+  const accuracy = weakest ? Math.round(weakest[1].correct / weakest[1].total * 100) : 0;
+  useEffect(() => { if (weakest) void fetchLookupMaps().then((maps) => setChapterName(maps.chapters[weakest[0]]?.name ?? "your weakest chapter")); }, [weakest?.[0]]);
   return (
     <div className="bg-gradient-card rounded-2xl border border-border p-4">
       <div className="flex items-center gap-2">
@@ -319,9 +339,7 @@ function RecommendationCard() {
         </p>
       </div>
       <p className="mt-2 text-sm leading-relaxed">
-        Your <span className="font-bold">Algebra</span> accuracy dropped to{" "}
-        <span className="font-bold text-destructive">52%</span>. Revise Ch. 4
-        and retry 10 questions.
+         {weakest ? <><span className="font-bold">{chapterName}</span> accuracy is{" "}<span className={`font-bold ${accuracy < 60 ? "text-destructive" : accuracy > 80 ? "text-success" : "text-primary"}`}>{accuracy}%</span>. {accuracy < 60 ? "Revise this chapter and solve 20 more questions." : accuracy > 80 ? "Excellent! You are ready for the next chapter." : "Keep practising to strengthen this chapter."}</> : <>Complete a practice set to unlock your personalised revision suggestion.</>}
       </p>
       <button
         type="button"
@@ -334,18 +352,23 @@ function RecommendationCard() {
 }
 
 function StreakCard() {
+  const { state } = usePyqStore();
+  const streak = streakSummary(state.attemptLog);
   const days = ["M", "T", "W", "T", "F", "S", "S"];
-  const done = [true, true, true, true, false, false, false];
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  const done = days.map((_d, i) => { const date = new Date(monday); date.setDate(monday.getDate() + i); return streak.active.has(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`); });
   return (
     <div className="bg-gradient-card rounded-2xl border border-border p-4">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <p className="font-display text-sm font-bold">This week</p>
-          <p className="text-[11px] text-muted-foreground">4 of 7 days · keep going</p>
+           <p className="text-[11px] text-muted-foreground">{streak.weekly} of 7 days · keep going</p>
         </div>
         <div className="flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-1">
           <Flame className="h-3.5 w-3.5 text-gold" />
-          <span className="text-xs font-bold text-gold">12</span>
+          <span className="text-xs font-bold text-gold">{streak.daily}</span>
         </div>
       </div>
       <div className="flex justify-between">
@@ -368,12 +391,21 @@ function StreakCard() {
   );
 }
 
+function DailyGoalCard() {
+  const { state } = usePyqStore();
+  const [goal, setGoalState] = useState(20);
+  useEffect(() => { setGoalState(getDailyGoal()); }, []);
+  const solved = todayCount(state.attemptLog);
+  const pct = Math.min(100, Math.round(solved / goal * 100));
+  return <div className="bg-gradient-card rounded-2xl border border-border p-4"><div className="flex items-center justify-between"><div><p className="font-display text-sm font-bold">Daily goal</p><p className="text-[11px] text-muted-foreground">{solved} of {goal} questions today</p></div><span className="font-display text-lg font-bold text-primary">{pct}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="bg-gradient-primary h-full rounded-full transition-all" style={{ width: `${pct}%` }} /></div><div className="mt-3 grid grid-cols-3 gap-2">{DAILY_GOALS.map((value) => <button key={value} onClick={() => { setDailyGoal(value); setGoalState(value); }} className={`rounded-xl py-2 text-xs font-bold ${goal === value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{value}/day</button>)}</div></div>;
+}
+
 function BottomNav() {
   const items = [
     { icon: GraduationCap, label: "Home", active: true, to: "/" },
     { icon: BookOpen, label: "Practice", to: "/practice" },
-    { icon: FlaskConical, label: "Mock", to: "/" },
-    { icon: LineChart, label: "Stats", to: "/" },
+    { icon: FlaskConical, label: "Mock", to: "/mock-test" },
+    { icon: LineChart, label: "Stats", to: "/analytics" },
   ];
   return (
     <nav className="fixed right-0 bottom-0 left-0 z-50 mx-auto max-w-md px-5 pb-5">

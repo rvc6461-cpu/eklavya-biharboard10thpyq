@@ -17,11 +17,13 @@ export type AttemptRecord = {
 
 export type PyqState = {
   attempts: Record<string, AttemptRecord>; // by questionId (latest)
+  attemptLog: AttemptRecord[]; // append-only local history for growth analytics
   bookmarks: string[]; // questionIds
   mistakes: string[]; // questionIds where latest attempt was wrong
+  mastered: string[]; // previously-wrong questions later solved correctly
 };
 
-const freshEmpty = (): PyqState => ({ attempts: {}, bookmarks: [], mistakes: [] });
+const freshEmpty = (): PyqState => ({ attempts: {}, attemptLog: [], bookmarks: [], mistakes: [], mastered: [] });
 
 function read(): PyqState {
   if (typeof window === "undefined") return freshEmpty();
@@ -31,8 +33,10 @@ function read(): PyqState {
     const parsed = JSON.parse(raw) as Partial<PyqState>;
     return {
       attempts: { ...(parsed.attempts ?? {}) },
+      attemptLog: [...(parsed.attemptLog ?? Object.values(parsed.attempts ?? {}))],
       bookmarks: [...(parsed.bookmarks ?? [])],
       mistakes: [...(parsed.mistakes ?? [])],
+      mastered: [...(parsed.mastered ?? [])],
     };
   } catch {
     return freshEmpty();
@@ -65,16 +69,20 @@ export function usePyqStore() {
   const recordAttempt = useCallback((a: AttemptRecord) => {
     const next = read();
     next.attempts[a.questionId] = a;
+    next.attemptLog = [...next.attemptLog, a].slice(-10000);
     const inMistakes = next.mistakes.includes(a.questionId);
     if (!a.correct && !inMistakes) next.mistakes = [...next.mistakes, a.questionId];
-    if (a.correct && inMistakes)
+    if (a.correct && inMistakes) {
       next.mistakes = next.mistakes.filter((id) => id !== a.questionId);
+      if (!next.mastered.includes(a.questionId)) next.mastered = [...next.mastered, a.questionId];
+    }
+    if (!a.correct) next.mastered = next.mastered.filter((id) => id !== a.questionId);
     write(next);
     setState(next); // instant local update — don't wait for the event round-trip
     pushAttempt(a); // fire-and-forget cloud sync (no-op if signed out)
   }, []);
 
-  const toggleBookmark = useCallback((questionId: string) => {
+  const toggleBookmark = useCallback((questionId: string, location?: { subjectId: string; chapterId: string }) => {
     const next = read();
     const on = !next.bookmarks.includes(questionId);
     next.bookmarks = on
@@ -82,7 +90,7 @@ export function usePyqStore() {
       : next.bookmarks.filter((id) => id !== questionId);
     write(next);
     setState(next); // instant local update
-    pushBookmark(questionId, on);
+    pushBookmark(questionId, on, location);
   }, []);
 
   return { state, recordAttempt, toggleBookmark };
