@@ -128,6 +128,33 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          message: string
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       mistakes: {
         Row: {
           chapter_id: string
@@ -349,6 +376,33 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          daily_reminders: boolean
+          premium_updates: boolean
+          streak_reminders: boolean
+          study_goal_reminders: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          daily_reminders?: boolean
+          premium_updates?: boolean
+          streak_reminders?: boolean
+          study_goal_reminders?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          daily_reminders?: boolean
+          premium_updates?: boolean
+          streak_reminders?: boolean
+          study_goal_reminders?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string
@@ -535,6 +589,69 @@ export type Database = {
           },
         ]
       }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          device_fingerprint_hash: string | null
+          id: string
+          referral_code: string
+          referred_id: string
+          referrer_id: string
+          rejected_reason: string | null
+          status: Database["public"]["Enums"]["referral_status"]
+          updated_at: string
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_fingerprint_hash?: string | null
+          id?: string
+          referral_code: string
+          referred_id: string
+          referrer_id: string
+          rejected_reason?: string | null
+          status?: Database["public"]["Enums"]["referral_status"]
+          updated_at?: string
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_fingerprint_hash?: string | null
+          id?: string
+          referral_code?: string
+          referred_id?: string
+          referrer_id?: string
+          rejected_reason?: string | null
+          status?: Database["public"]["Enums"]["referral_status"]
+          updated_at?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       sub_subjects: {
         Row: {
           created_at: string
@@ -641,6 +758,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_or_create_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -650,11 +768,13 @@ export type Database = {
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
+      unlock_premium_for_user: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
       question_difficulty: "easy" | "medium" | "hard"
       question_status: "draft" | "published"
+      referral_status: "pending" | "verified" | "rejected"
       resource_type: "pyq_paper" | "formula_sheet" | "premium_note"
     }
     CompositeTypes: {
@@ -786,6 +906,7 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       question_difficulty: ["easy", "medium", "hard"],
       question_status: ["draft", "published"],
+      referral_status: ["pending", "verified", "rejected"],
       resource_type: ["pyq_paper", "formula_sheet", "premium_note"],
     },
   },
