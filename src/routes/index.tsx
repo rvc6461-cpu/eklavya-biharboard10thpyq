@@ -23,8 +23,10 @@ import {
   Calendar,
   Quote,
   Crown,
+  Search,
   type LucideIcon,
 } from "lucide-react";
+import { fetchSubjects, type DbSubject } from "@/lib/pyq/db";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -91,9 +93,9 @@ function Header() {
         </div>
       </Link>
       <Link
-        to={user ? "/profile" : "/auth"}
+        to={user ? "/notifications" : "/auth"}
         className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-card"
-        aria-label={user ? "Profile" : "Sign in"}
+        aria-label={user ? "Notifications" : "Sign in"}
       >
         <Bell className="h-5 w-5 text-muted-foreground" />
         <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-gold" />
@@ -163,8 +165,8 @@ function formatK(n: number) {
 
 function ContinueCard() {
   return (
-    <button
-      type="button"
+    <Link
+      to="/practice"
       className="bg-gradient-primary shadow-glow group flex w-full items-center gap-4 rounded-2xl p-4 text-left"
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
@@ -182,7 +184,7 @@ function ContinueCard() {
         </div>
       </div>
       <ChevronRight className="h-5 w-5 text-white/70 transition group-hover:translate-x-1" />
-    </button>
+    </Link>
   );
 }
 
@@ -191,15 +193,16 @@ function SectionTitle({ title, action }: { title: string; action?: string }) {
     <div className="flex items-center justify-between pt-1">
       <h3 className="font-display text-base font-bold">{title}</h3>
       {action && (
-        <button type="button" className="text-xs font-semibold text-primary">
+        <Link to="/practice" className="text-xs font-semibold text-primary">
           {action}
-        </button>
+        </Link>
       )}
     </div>
   );
 }
 
 type Subject = {
+  id?: string;
   name: string;
   short: string;
   progress: number;
@@ -217,10 +220,21 @@ const SUBJECTS: Subject[] = [
 ];
 
 function Subjects() {
+  const [dbSubjects, setDbSubjects] = useState<DbSubject[]>([]);
+  useEffect(() => { fetchSubjects().then(setDbSubjects); }, []);
+  const subjects = dbSubjects.length ? dbSubjects.map((subject) => ({
+    id: subject.id,
+    name: subject.name,
+    short: subject.short,
+    progress: 0,
+    chapters: "—",
+    hue: subject.hue,
+    glyph: subject.glyph,
+  })) : SUBJECTS;
   return (
     <div className="-mx-5 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <div className="flex gap-3">
-        {SUBJECTS.map((s) => (
+        {subjects.map((s) => (
           <SubjectCard key={s.name} subject={s} />
         ))}
       </div>
@@ -229,18 +243,15 @@ function Subjects() {
 }
 
 function SubjectCard({ subject }: { subject: Subject }) {
-  return (
-    <button
-      type="button"
-      className="bg-gradient-card shadow-card-premium relative w-44 shrink-0 overflow-hidden rounded-2xl border border-border p-4 text-left"
-    >
+  const content = (
+    <>
       <div
         className={`bg-gradient-to-br ${subject.hue} flex h-11 w-11 items-center justify-center rounded-xl font-display text-xl font-bold text-white shadow-lg`}
       >
         {subject.glyph}
       </div>
       <p className="mt-3 font-display text-sm font-bold">{subject.name}</p>
-      <p className="text-[11px] text-muted-foreground">{subject.chapters} chapters</p>
+      <p className="text-[11px] text-muted-foreground">{subject.chapters === "—" ? "Open to explore" : `${subject.chapters} chapters`}</p>
       <div className="mt-3 flex items-center justify-between">
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
           <div
@@ -250,7 +261,10 @@ function SubjectCard({ subject }: { subject: Subject }) {
         </div>
         <span className="ml-2 text-[11px] font-bold text-foreground">{subject.progress}%</span>
       </div>
-    </button>
+    </>
+  );
+  return (
+    subject.id ? <Link to="/practice/$subject" params={{ subject: subject.id }} className="bg-gradient-card shadow-card-premium relative block w-44 shrink-0 overflow-hidden rounded-2xl border border-border p-4 text-left">{content}</Link> : <Link to="/practice" className="bg-gradient-card shadow-card-premium relative block w-44 shrink-0 overflow-hidden rounded-2xl border border-border p-4 text-left">{content}</Link>
   );
 }
 
@@ -290,7 +304,7 @@ function ToolsGrid() {
 
 function PremiumCard() {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-amber-500/20 via-card to-card p-5 shadow-gold">
+    <Link to="/premium" className="relative block overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-amber-500/20 via-card to-card p-5 shadow-gold">
       <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-gold/30 blur-3xl" />
       <div className="relative flex items-center gap-4">
         <div className="bg-gradient-gold shadow-gold flex h-14 w-14 items-center justify-center rounded-2xl">
@@ -312,7 +326,7 @@ function PremiumCard() {
         </div>
         <ChevronRight className="h-5 w-5 text-gold" />
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -341,12 +355,12 @@ function RecommendationCard() {
       <p className="mt-2 text-sm leading-relaxed">
          {weakest ? <><span className="font-bold">{chapterName}</span> accuracy is{" "}<span className={`font-bold ${accuracy < 60 ? "text-destructive" : accuracy > 80 ? "text-success" : "text-primary"}`}>{accuracy}%</span>. {accuracy < 60 ? "Revise this chapter and solve 20 more questions." : accuracy > 80 ? "Excellent! You are ready for the next chapter." : "Keep practising to strengthen this chapter."}</> : <>Complete a practice set to unlock your personalised revision suggestion.</>}
       </p>
-      <button
-        type="button"
+      <Link
+        to="/mistakes"
         className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-primary"
       >
         Start revision <ChevronRight className="h-3.5 w-3.5" />
-      </button>
+      </Link>
     </div>
   );
 }

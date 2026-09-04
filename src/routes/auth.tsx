@@ -1,13 +1,15 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getDeviceToken } from "@/lib/phase4b";
 
-type AuthSearch = { next?: string };
+type AuthSearch = { next?: string; ref?: string };
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>): AuthSearch => ({
     next: typeof s.next === "string" ? s.next : undefined,
+    ref: typeof s.ref === "string" ? s.ref.trim().toUpperCase() : undefined,
   }),
   component: AuthPage,
   head: () => ({
@@ -29,6 +31,7 @@ function AuthPage() {
   const search = useSearch({ from: "/auth" });
   const navigate = useNavigate();
   const next = sanitizeNext(search.next);
+  const referralCode = search.ref ?? (typeof window !== "undefined" ? window.localStorage.getItem("eklavya:pending-referral") ?? undefined : undefined);
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -38,6 +41,7 @@ function AuthPage() {
   const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
+    if (search.ref && typeof window !== "undefined") window.localStorage.setItem("eklavya:pending-referral", search.ref);
     let cancelled = false;
     supabase.auth.getSession().then(({ data }) => {
       if (!cancelled && data.session) {
@@ -59,9 +63,13 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin + next },
+          options: {
+            emailRedirectTo: window.location.origin + next,
+            data: referralCode ? { referral_code: referralCode, device_token: getDeviceToken() } : { device_token: getDeviceToken() },
+          },
         });
         if (error) throw error;
+        window.localStorage.removeItem("eklavya:pending-referral");
         setInfo("Check your email to confirm, then sign in.");
         setMode("signin");
       } else {
