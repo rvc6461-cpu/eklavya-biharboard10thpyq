@@ -84,7 +84,24 @@ function ProfilePage() {
     ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })
     : "—";
 
-  const accuracy = stats.accuracy;
+  // Same data source and calculation logic as Learning Analytics.
+  const log = state.attemptLog;
+  const summary = streakSummary(log);
+  const correctCount = log.filter((a) => a.correct).length;
+  const accuracy = log.length ? Math.round((correctCount / log.length) * 100) : 0;
+  const practiceMinutes =
+    log.length > 1
+      ? Math.max(1, Math.round((Math.max(...log.map((a) => a.at)) - Math.min(...log.map((a) => a.at))) / 60000))
+      : log.length;
+  const stats = {
+    attempts: log.length,
+    bookmarks: state.bookmarks.length,
+    mistakes: state.mistakes.length,
+    mockTests: mockTests.length,
+    currentStreak: summary.daily,
+    bestStreak: summary.best,
+    practiceMinutes,
+  };
 
   async function saveProfile() {
     setSaving(true);
