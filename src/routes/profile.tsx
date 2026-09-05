@@ -275,13 +275,13 @@ function ProfilePage() {
               {mockTests.map((m) => (
                 <div key={m.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{m.test_name}</p>
+                    <p className="truncate text-sm font-semibold">{m.subjectName} · Mock Test {m.testNo}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      {new Date(m.taken_at).toLocaleDateString()} · {m.score}/{m.total_questions} · {Math.round(m.time_taken_seconds / 60)}m
+                      {new Date(m.at).toLocaleDateString()} · {m.score}/{m.total} · {Math.round(m.timeTakenSeconds / 60)}m
                     </p>
                   </div>
                   <span className="rounded-full bg-primary/15 px-2.5 py-1 text-xs font-bold text-primary">
-                    {Math.round(Number(m.percentage))}%
+                    {Math.round(Number(m.accuracy))}%
                   </span>
                 </div>
               ))}
