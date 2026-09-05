@@ -41,12 +41,23 @@ function ProfilePage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { profile, updateProfile } = useProfile(user);
-  const { stats } = useLiveStats(user);
-  const mockTests = useMockTests(user);
+  const { state } = usePyqStore();
+  const [mockTests, setMockTests] = useState<MockAttempt[]>([]);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [year, setYear] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const refresh = () => setMockTests(listAttempts());
+    refresh();
+    window.addEventListener("eklavya:pyq:update", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("eklavya:pyq:update", refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", search: { next: "/profile" } });
