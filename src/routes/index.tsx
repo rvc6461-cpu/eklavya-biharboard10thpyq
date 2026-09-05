@@ -23,7 +23,6 @@ import {
   Calendar,
   Quote,
   Crown,
-  Search,
   type LucideIcon,
 } from "lucide-react";
 import { fetchSubjects, type DbSubject } from "@/lib/pyq/db";
@@ -92,14 +91,19 @@ function Header() {
           <h1 className="font-display text-base leading-tight font-bold">{name}</h1>
         </div>
       </Link>
-      <Link
-        to={user ? "/notifications" : "/auth"}
-        className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-card"
-        aria-label={user ? "Notifications" : "Sign in"}
-      >
-        <Bell className="h-5 w-5 text-muted-foreground" />
-        <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-gold" />
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link to="/search" className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-card" aria-label="Search">
+          <svg viewBox="0 0 24 24" className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+        </Link>
+        <Link
+          to={user ? "/notifications" : "/auth"}
+          className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-card"
+          aria-label={user ? "Notifications" : "Sign in"}
+        >
+          <Bell className="h-5 w-5 text-muted-foreground" />
+          <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-gold" />
+        </Link>
+      </div>
     </header>
   );
 }

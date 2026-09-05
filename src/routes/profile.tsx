@@ -16,6 +16,8 @@ import {
   Flame,
   Clock,
   Trophy,
+  Share2,
+  Settings,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useProfile } from "@/hooks/useAuth";
@@ -265,24 +267,33 @@ function ProfilePage() {
                 <Crown className="h-5 w-5 text-gold" />
               </div>
               <div>
-                <p className="text-sm font-semibold">
-                  {profile?.is_premium ? "Premium member" : "Free plan"}
+                <p className="flex items-center gap-1.5 text-sm font-semibold">
+                  {profile?.is_premium ? <><Crown className="h-4 w-4 text-gold" /> Premium Member</> : "Free plan"}
                 </p>
                 <p className="text-[11px] text-muted-foreground">
                   {profile?.is_premium
                     ? profile.premium_expires_at
                       ? `Renews ${new Date(profile.premium_expires_at).toLocaleDateString()}`
-                      : "Lifetime access"
+                      : `Lifetime access${profile.premium_unlocked_at ? ` · Unlocked ${new Date(profile.premium_unlocked_at).toLocaleDateString()}` : ""}`
                     : "Unlock handwritten notes and analytics"}
                 </p>
               </div>
             </div>
             {!profile?.is_premium && (
-              <button className="rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-black">
-                Upgrade
-              </button>
+              <Link to="/referral" className="rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-black">
+                Refer to unlock
+              </Link>
             )}
           </div>
+        </section>
+
+        <section className="mt-4 grid grid-cols-2 gap-3 px-5">
+          <Link to="/referral" className="flex items-center gap-2 rounded-2xl border border-border bg-card p-3 text-xs font-semibold">
+            <Share2 className="h-4 w-4 text-gold" /> Refer & Earn
+          </Link>
+          <Link to="/settings" className="flex items-center gap-2 rounded-2xl border border-border bg-card p-3 text-xs font-semibold">
+            <Settings className="h-4 w-4 text-primary" /> Settings
+          </Link>
         </section>
 
         {/* Sign out */}
