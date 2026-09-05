@@ -49,7 +49,7 @@ function ProfilePage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const refresh = () => setMockTests(listAttempts());
+    const refresh = () => setMockTests(listAttempts().slice().reverse());
     refresh();
     window.addEventListener("eklavya:pyq:update", refresh);
     window.addEventListener("storage", refresh);
