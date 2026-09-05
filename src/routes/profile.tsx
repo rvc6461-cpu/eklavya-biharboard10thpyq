@@ -21,7 +21,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useProfile } from "@/hooks/useAuth";
-import { useLiveStats, useMockTests } from "@/hooks/useLiveStats";
+import { usePyqStore } from "@/lib/pyq/store";
+import { streakSummary } from "@/lib/pyq/smart";
+import { listAttempts, type MockAttempt } from "@/lib/pyq/mockStore";
 
 export const Route = createFileRoute("/profile")({
   ssr: false,
@@ -39,12 +41,23 @@ function ProfilePage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { profile, updateProfile } = useProfile(user);
-  const { stats } = useLiveStats(user);
-  const mockTests = useMockTests(user);
+  const { state } = usePyqStore();
+  const [mockTests, setMockTests] = useState<MockAttempt[]>([]);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [year, setYear] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const refresh = () => setMockTests(listAttempts().slice().reverse());
+    refresh();
+    window.addEventListener("eklavya:pyq:update", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("eklavya:pyq:update", refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", search: { next: "/profile" } });
@@ -71,7 +84,24 @@ function ProfilePage() {
     ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })
     : "—";
 
-  const accuracy = stats.accuracy;
+  // Same data source and calculation logic as Learning Analytics.
+  const log = state.attemptLog;
+  const summary = streakSummary(log);
+  const correctCount = log.filter((a) => a.correct).length;
+  const accuracy = log.length ? Math.round((correctCount / log.length) * 100) : 0;
+  const practiceMinutes =
+    log.length > 1
+      ? Math.max(1, Math.round((Math.max(...log.map((a) => a.at)) - Math.min(...log.map((a) => a.at))) / 60000))
+      : log.length;
+  const stats = {
+    attempts: log.length,
+    bookmarks: state.bookmarks.length,
+    mistakes: state.mistakes.length,
+    mockTests: mockTests.length,
+    currentStreak: summary.daily,
+    bestStreak: summary.best,
+    practiceMinutes,
+  };
 
   async function saveProfile() {
     setSaving(true);
@@ -245,13 +275,13 @@ function ProfilePage() {
               {mockTests.map((m) => (
                 <div key={m.id} className="flex items-center justify-between rounded-2xl border border-border bg-card p-3">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{m.test_name}</p>
+                    <p className="truncate text-sm font-semibold">{m.subjectName} · Mock Test {m.testNo}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      {new Date(m.taken_at).toLocaleDateString()} · {m.score}/{m.total_questions} · {Math.round(m.time_taken_seconds / 60)}m
+                      {new Date(m.at).toLocaleDateString()} · {m.score}/{m.total} · {Math.round(m.timeTakenSeconds / 60)}m
                     </p>
                   </div>
                   <span className="rounded-full bg-primary/15 px-2.5 py-1 text-xs font-bold text-primary">
-                    {Math.round(Number(m.percentage))}%
+                    {Math.round(Number(m.accuracy))}%
                   </span>
                 </div>
               ))}
