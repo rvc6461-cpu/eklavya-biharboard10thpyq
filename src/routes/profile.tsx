@@ -21,7 +21,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useProfile } from "@/hooks/useAuth";
-import { useLiveStats, useMockTests } from "@/hooks/useLiveStats";
+import { usePyqStore } from "@/lib/pyq/store";
+import { streakSummary } from "@/lib/pyq/smart";
+import { listAttempts, type MockAttempt } from "@/lib/pyq/mockStore";
 
 export const Route = createFileRoute("/profile")({
   ssr: false,
