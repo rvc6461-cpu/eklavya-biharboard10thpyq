@@ -1,7 +1,7 @@
 # Phase 4B Roadmap
 
-- [ ] Add secure referral, premium unlock, notification, feedback, and app-info backend schema.
-- [ ] Add protected referral/profile/preferences functions and client data helpers.
-- [ ] Add referral, notification, feedback, contact, about, settings, and premium screens.
-- [ ] Wire auth referral capture, profile premium badge, and all home actions/navigation.
-- [ ] Fix hydration mismatch and verify routes, flows, tests, and runtime logs.
+- [x] Add secure referral, premium unlock, notification, feedback, and app-info backend schema.
+- [x] Add protected referral/profile/preferences functions and client data helpers.
+- [x] Add referral, notification, feedback, contact, about, settings, search, and premium screens.
+- [x] Wire auth referral capture, profile premium badge, and home actions/navigation.
+- [x] Fix hydration mismatch and verify public routes, signed-out guards, navigation, and runtime logs.
