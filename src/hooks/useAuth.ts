@@ -31,6 +31,7 @@ export type Profile = {
   premium_unlocked_at: string | null;
   created_at: string;
   updated_at: string;
+  appearance_mode: "light" | "dark" | "system";
 };
 
 export function useProfile(user: User | null) {

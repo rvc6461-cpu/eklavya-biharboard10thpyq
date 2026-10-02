@@ -5,3 +5,10 @@
 - [x] Add referral, notification, feedback, contact, about, settings, search, and premium screens.
 - [x] Wire auth referral capture, profile premium badge, and home actions/navigation.
 - [x] Fix hydration mismatch and verify public routes, signed-out guards, navigation, and runtime logs.
+
+## Current fixes
+- [ ] Persist admin-managed exam date and show live countdown on home.
+- [ ] Persist admin-managed daily motivation quotes with date/active fallback.
+- [ ] Align homepage statistics with Analytics without loading-zero flashes.
+- [ ] Resume latest unfinished practice or mock session with saved state.
+- [ ] Add persisted Light/Dark appearance settings while preserving current dark theme.

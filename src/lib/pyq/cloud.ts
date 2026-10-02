@@ -84,32 +84,58 @@ export async function saveMockTest(input: {
   });
 }
 
-export async function upsertPracticeSession(subjectId: string, chapterId: string, lastQuestionIndex: number) {
+export type PracticeSessionSnapshot = {
+  subjectId: string;
+  chapterId: string;
+  setNumber: number;
+  lastQuestionIndex: number;
+  questionOrder: string[];
+  answers: Record<string, number>;
+  selectedOption: number | null;
+  revealed: boolean;
+  shuffle: boolean;
+  shuffleSeed: number;
+  completed?: boolean;
+};
+
+export async function upsertPracticeSession(snapshot: PracticeSessionSnapshot) {
   if (!currentUserId) return;
   await supabase
     .from("practice_sessions")
     .upsert(
       {
         user_id: currentUserId,
-        subject_id: subjectId,
-        chapter_id: chapterId,
-        last_question_index: lastQuestionIndex,
+        subject_id: snapshot.subjectId,
+        chapter_id: snapshot.chapterId,
+        set_number: snapshot.setNumber,
+        last_question_index: snapshot.lastQuestionIndex,
+        question_order: snapshot.questionOrder,
+        answers: snapshot.answers,
+        selected_option: snapshot.selectedOption,
+        revealed: snapshot.revealed,
+        shuffle: snapshot.shuffle,
+        shuffle_seed: snapshot.shuffleSeed,
+        completed: snapshot.completed ?? false,
         last_practiced_at: new Date().toISOString(),
       },
       { onConflict: "user_id,subject_id,chapter_id" },
     );
 }
 
-export async function getPracticeSession(subjectId: string, chapterId: string) {
+export async function getPracticeSession(subjectId: string, chapterId: string, setNumber?: number) {
   if (!currentUserId) return null;
-  const { data } = await supabase
+  let query = supabase
     .from("practice_sessions")
-    .select("last_question_index")
+    .select("*")
     .eq("user_id", currentUserId)
     .eq("subject_id", subjectId)
     .eq("chapter_id", chapterId)
-    .maybeSingle();
-  return data?.last_question_index ?? null;
+    .eq("completed", false)
+    .order("last_practiced_at", { ascending: false })
+    .limit(1);
+  if (setNumber != null) query = query.eq("set_number", setNumber);
+  const { data } = await query.maybeSingle();
+  return data;
 }
 
 // One-shot merge on login: pull cloud, union with local, apply back to local
