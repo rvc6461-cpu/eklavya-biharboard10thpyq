@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          created_at: string
+          exam_date: string | null
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exam_date?: string | null
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exam_date?: string | null
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       attempts: {
         Row: {
           chapter_id: string
@@ -310,6 +331,36 @@ export type Database = {
         }
         Relationships: []
       }
+      motivation_quotes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          quote_date: string | null
+          quote_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          quote_date?: string | null
+          quote_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          quote_date?: string | null
+          quote_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           chapter_id: string | null
@@ -438,33 +489,57 @@ export type Database = {
       }
       practice_sessions: {
         Row: {
+          answers: Json
           chapter_id: string
+          completed: boolean
           created_at: string
           id: string
           last_practiced_at: string
           last_question_index: number
+          question_order: Json
+          revealed: boolean
+          selected_option: number | null
+          set_number: number
+          shuffle: boolean
+          shuffle_seed: number
           subject_id: string
           total_time_seconds: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          answers?: Json
           chapter_id: string
+          completed?: boolean
           created_at?: string
           id?: string
           last_practiced_at?: string
           last_question_index?: number
+          question_order?: Json
+          revealed?: boolean
+          selected_option?: number | null
+          set_number?: number
+          shuffle?: boolean
+          shuffle_seed?: number
           subject_id: string
           total_time_seconds?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          answers?: Json
           chapter_id?: string
+          completed?: boolean
           created_at?: string
           id?: string
           last_practiced_at?: string
           last_question_index?: number
+          question_order?: Json
+          revealed?: boolean
+          selected_option?: number | null
+          set_number?: number
+          shuffle?: boolean
+          shuffle_seed?: number
           subject_id?: string
           total_time_seconds?: number
           updated_at?: string
@@ -474,6 +549,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          appearance_mode: string
           avatar_url: string | null
           created_at: string
           display_name: string | null
@@ -485,6 +561,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          appearance_mode?: string
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
@@ -496,6 +573,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          appearance_mode?: string
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
