@@ -138,6 +138,19 @@ export async function getPracticeSession(subjectId: string, chapterId: string, s
   return data;
 }
 
+export async function getLatestPracticeSession() {
+  if (!currentUserId) return null;
+  const { data } = await supabase
+    .from("practice_sessions")
+    .select("*")
+    .eq("user_id", currentUserId)
+    .eq("completed", false)
+    .order("last_practiced_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data;
+}
+
 // One-shot merge on login: pull cloud, union with local, apply back to local
 // and upload anything that was local-only.
 export async function mergeOnLogin(

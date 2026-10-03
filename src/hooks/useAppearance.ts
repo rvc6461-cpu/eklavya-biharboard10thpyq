@@ -33,8 +33,10 @@ export function useAppearance() {
   }, [user]);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", resolve(mode) === "dark");
-    document.documentElement.style.colorScheme = resolve(mode);
+    const active = resolve(mode);
+    document.documentElement.classList.toggle("dark", active === "dark");
+    document.documentElement.classList.toggle("light", active === "light");
+    document.documentElement.style.colorScheme = active;
   }, [mode]);
 
   async function changeMode(next: AppearanceMode) {
