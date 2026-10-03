@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useCloudSync } from "../hooks/useCloudSync";
+import { useAppearance } from "../hooks/useAppearance";
 
 function NotFoundComponent() {
   return (
@@ -120,10 +121,16 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CloudSyncGate />
+      <AppearanceGate />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
     </QueryClientProvider>
   );
+}
+
+function AppearanceGate() {
+  useAppearance();
+  return null;
 }
 
 function CloudSyncGate() {
