@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth, useProfile } from "@/hooks/useAuth";
-import { useLiveStats } from "@/hooks/useLiveStats";
 import { usePyqStore } from "@/lib/pyq/store";
 import { DAILY_GOALS, getDailyGoal, setDailyGoal, streakSummary, todayCount } from "@/lib/pyq/smart";
-import { fetchLookupMaps } from "@/lib/pyq/db";
+import { fetchLookupMaps, fetchSubjects, type DbSubject } from "@/lib/pyq/db";
+import { daysUntil, fetchExamDate, fetchTodayMotivation } from "@/lib/appSettings";
+import { getLatestPracticeSession } from "@/lib/pyq/cloud";
 import {
   BookOpen,
   FileText,
@@ -25,7 +26,6 @@ import {
   Crown,
   type LucideIcon,
 } from "lucide-react";
-import { fetchSubjects, type DbSubject } from "@/lib/pyq/db";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,8 +47,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Home,
 });
-
-const DAYS_TO_EXAM = 142;
 
 function Home() {
   return (
@@ -109,6 +107,14 @@ function Header() {
 }
 
 function HeroCard() {
+  const [examDate, setExamDate] = useState<string | null>(null);
+  const [quote, setQuote] = useState("Sapne wo nahi jo neend mein aaye, sapne wo hain jo neend hi na aane de.");
+  useEffect(() => {
+    void Promise.all([fetchExamDate(), fetchTodayMotivation()]).then(([date, dailyQuote]) => {
+      setExamDate(date);
+      if (dailyQuote?.quote_text) setQuote(dailyQuote.quote_text);
+    });
+  }, []);
   return (
     <div className="bg-hero shadow-card-premium relative overflow-hidden rounded-3xl border border-white/5 p-6">
       <div className="bg-primary/30 absolute -top-16 -right-16 h-48 w-48 rounded-full blur-3xl" />
@@ -117,7 +123,7 @@ function HeroCard() {
         <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 backdrop-blur">
           <Calendar className="h-3 w-3 text-gold" />
           <span className="text-[11px] font-semibold tracking-wide">
-            BSEB 2026 · {DAYS_TO_EXAM} days left
+            BSEB 2026 · {daysUntil(examDate) ?? "—"} days left
           </span>
         </div>
         <h2 className="font-display mt-4 text-2xl leading-tight font-bold">
@@ -127,7 +133,7 @@ function HeroCard() {
         <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-white/5 bg-black/20 p-3">
           <Quote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
           <p className="text-xs leading-relaxed text-muted-foreground">
-            "Sapne wo nahi jo neend mein aaye, sapne wo hain jo neend hi na aane de."
+            {quote}
           </p>
         </div>
       </div>
@@ -137,11 +143,16 @@ function HeroCard() {
 
 function StatsRow() {
   const { user } = useAuth();
-  const { stats } = useLiveStats(user);
+  const { state } = usePyqStore();
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
+  const log = state.attemptLog;
+  const streak = streakSummary(log);
+  const accuracy = log.length ? Math.round(log.filter((attempt) => attempt.correct).length / log.length * 100) : 0;
   const items = [
-    { icon: Flame, label: "Streak", value: user ? String(stats.currentStreak) : "0", suffix: "d", tint: "text-gold" },
-    { icon: Target, label: "Accuracy", value: user ? String(stats.accuracy) : "0", suffix: "%", tint: "text-primary" },
-    { icon: Trophy, label: "Solved", value: user ? formatK(stats.attempts) : "0", suffix: "", tint: "text-success" },
+    { icon: Flame, label: "Streak", value: !ready ? "—" : user ? String(streak.daily) : "0", suffix: "d", tint: "text-gold" },
+    { icon: Target, label: "Accuracy", value: !ready ? "—" : user ? String(accuracy) : "0", suffix: "%", tint: "text-primary" },
+    { icon: Trophy, label: "Solved", value: !ready ? "—" : user ? formatK(log.length) : "0", suffix: "", tint: "text-success" },
   ];
   return (
     <div className="grid grid-cols-3 gap-3">
@@ -168,9 +179,26 @@ function formatK(n: number) {
 }
 
 function ContinueCard() {
+  const { user } = useAuth();
+  const [session, setSession] = useState<any>(null);
+  const [maps, setMaps] = useState<{ subjects: Record<string, { name: string }>; chapters: Record<string, { name: string }> } | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    void getLatestPracticeSession().then((row) => {
+      if (!row) return;
+      setSession(row);
+      void fetchLookupMaps().then(setMaps);
+    });
+  }, [user]);
+  if (!session) return null;
+  const subjectName = maps?.subjects[session.subject_id]?.name ?? "Practice";
+  const chapterName = maps?.chapters[session.chapter_id]?.name ?? "Your latest session";
+  const total = Array.isArray(session.question_order) ? session.question_order.length : 0;
+  const progress = total ? Math.min(100, Math.round(((session.last_question_index + (session.revealed ? 1 : 0)) / total) * 100)) : 0;
   return (
     <Link
-      to="/practice"
+      to="/practice/$subject/$chapter/$set"
+      params={{ subject: session.subject_id, chapter: session.chapter_id, set: String(session.set_number ?? 1) }}
       className="bg-gradient-primary shadow-glow group flex w-full items-center gap-4 rounded-2xl p-4 text-left"
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
@@ -181,10 +209,10 @@ function ContinueCard() {
           Continue practice
         </p>
         <p className="truncate font-display text-sm font-bold text-white">
-          Math · Trigonometry · Q 15/50
+          {subjectName} · {chapterName} · Q {Math.min(session.last_question_index + 1, total)}/{total}
         </p>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15">
-          <div className="h-full w-[30%] rounded-full bg-gold" />
+          <div className="h-full rounded-full bg-gold" style={{ width: `${progress}%` }} />
         </div>
       </div>
       <ChevronRight className="h-5 w-5 text-white/70 transition group-hover:translate-x-1" />

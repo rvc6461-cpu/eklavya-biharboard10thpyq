@@ -42,6 +42,7 @@ import { Route as AdminQuestionsRouteImport } from './routes/admin.questions'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminNotesRouteImport } from './routes/admin.notes'
 import { Route as AdminMockTestsRouteImport } from './routes/admin.mock-tests'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
 import { Route as AdminChaptersRouteImport } from './routes/admin.chapters'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -225,6 +226,11 @@ const AdminMockTestsRoute = AdminMockTestsRouteImport.update({
   path: '/mock-tests',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminChaptersRoute = AdminChaptersRouteImport.update({
   id: '/chapters',
   path: '/chapters',
@@ -342,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/chapters': typeof AdminChaptersRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/mock-tests': typeof AdminMockTestsRoute
   '/admin/notes': typeof AdminNotesRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -391,6 +398,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/chapters': typeof AdminChaptersRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/mock-tests': typeof AdminMockTestsRoute
   '/admin/notes': typeof AdminNotesRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -441,6 +449,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/chapters': typeof AdminChaptersRoute
+  '/admin/content': typeof AdminContentRoute
   '/admin/mock-tests': typeof AdminMockTestsRoute
   '/admin/notes': typeof AdminNotesRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -495,6 +504,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/analytics'
     | '/admin/chapters'
+    | '/admin/content'
     | '/admin/mock-tests'
     | '/admin/notes'
     | '/admin/notifications'
@@ -544,6 +554,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/analytics'
     | '/admin/chapters'
+    | '/admin/content'
     | '/admin/mock-tests'
     | '/admin/notes'
     | '/admin/notifications'
@@ -593,6 +604,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/analytics'
     | '/admin/chapters'
+    | '/admin/content'
     | '/admin/mock-tests'
     | '/admin/notes'
     | '/admin/notifications'
@@ -887,6 +899,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMockTestsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/chapters': {
       id: '/admin/chapters'
       path: '/chapters'
@@ -1012,6 +1031,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminChaptersRoute: typeof AdminChaptersRoute
+  AdminContentRoute: typeof AdminContentRoute
   AdminMockTestsRoute: typeof AdminMockTestsRoute
   AdminNotesRoute: typeof AdminNotesRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
@@ -1024,6 +1044,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminChaptersRoute: AdminChaptersRoute,
+  AdminContentRoute: AdminContentRoute,
   AdminMockTestsRoute: AdminMockTestsRoute,
   AdminNotesRoute: AdminNotesRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,

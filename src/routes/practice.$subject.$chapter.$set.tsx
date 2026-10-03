@@ -7,6 +7,7 @@ import {
 import { buildPracticeSets, writeSetBestScore, type Question } from "@/lib/pyq/data";
 import { fetchSubjectById, fetchChapterById, fetchChapterQuestions } from "@/lib/pyq/db";
 import { usePyqStore } from "@/lib/pyq/store";
+import { getPracticeSession, upsertPracticeSession } from "@/lib/pyq/cloud";
 
 export const Route = createFileRoute("/practice/$subject/$chapter/$set")({
   loader: async ({ params }) => {
@@ -43,6 +44,7 @@ function PracticeSetSession() {
   const [revealed, setRevealed] = useState(false);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [done, setDone] = useState(false);
+  const [restored, setRestored] = useState(false);
 
   const order = useMemo(() => {
     const arr = questions.map((_: Question, i: number) => i);
@@ -61,11 +63,43 @@ function PracticeSetSession() {
   const bestKey = `${subject.id}:${chapter.id}:${setNumber}`;
 
   useEffect(() => {
+    let cancelled = false;
+    void getPracticeSession(subject.id, chapter.id, setNumber).then((saved) => {
+      if (cancelled || !saved) { setRestored(true); return; }
+      setShuffle(saved.shuffle);
+      setShuffleSeed(saved.shuffle_seed);
+      const savedIds = Array.isArray(saved.question_order) ? saved.question_order as string[] : [];
+      const savedOrder = savedIds.map((id) => questions.findIndex((q) => q.id === id)).filter((i) => i >= 0);
+      if (savedOrder.length === questions.length) {
+        const current = savedOrder[Number(saved.last_question_index) || 0];
+        setIdx(Math.max(0, Math.min(savedOrder.length - 1, Number(saved.last_question_index) || 0)));
+        setSelected(saved.selected_option);
+        setRevealed(saved.revealed);
+        setSessionCorrect(Object.values(saved.answers as Record<string, number>).filter((answer, i) => answer === questions[savedOrder[i]]?.answer).length);
+        if (current < 0) setIdx(0);
+      }
+      setRestored(true);
+    });
+    return () => { cancelled = true; };
+  }, [subject.id, chapter.id, setNumber, questions]);
+
+  useEffect(() => {
+    if (!restored || done || !question) return;
+    void upsertPracticeSession({
+      subjectId: subject.id, chapterId: chapter.id, setNumber,
+      lastQuestionIndex: idx, questionOrder: order.map((i) => questions[i].id),
+      answers: selected == null ? {} : { [question.id]: selected }, selectedOption: selected,
+      revealed, shuffle, shuffleSeed,
+    });
+  }, [restored, done, subject.id, chapter.id, setNumber, idx, order, questions, question, selected, revealed, shuffle, shuffleSeed]);
+
+  useEffect(() => {
     if (done) {
       const pct = total > 0 ? Math.round((sessionCorrect / total) * 100) : 0;
       writeSetBestScore(bestKey, pct);
     }
-  }, [done, sessionCorrect, total, bestKey]);
+    void upsertPracticeSession({ subjectId: subject.id, chapterId: chapter.id, setNumber, lastQuestionIndex: idx, questionOrder: order.map((i) => questions[i].id), answers: {}, selectedOption: null, revealed: false, shuffle, shuffleSeed, completed: true });
+  }, [done, sessionCorrect, total, bestKey, subject.id, chapter.id, setNumber, idx, order, questions, shuffle, shuffleSeed]);
 
   const resetSession = (reshuffle = false) => {
     setIdx(0); setSelected(null); setRevealed(false);

@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard, BookOpen, FolderTree, Layers, ListChecks, ClipboardList,
   FileText, Bell, BarChart3, Menu, X, LogOut,
+  Settings2,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,7 @@ const NAV = [
   { to: "/admin/mock-tests", label: "Mock Tests", icon: ClipboardList },
   { to: "/admin/notes", label: "Notes", icon: FileText },
   { to: "/admin/notifications", label: "Notifications", icon: Bell },
+  { to: "/admin/content", label: "Exam & Motivation", icon: Settings2 },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
