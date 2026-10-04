@@ -184,21 +184,38 @@ function ContinueCard() {
   const [maps, setMaps] = useState<{ subjects: Record<string, { name: string }>; chapters: Record<string, { name: string }> } | null>(null);
   useEffect(() => {
     if (!user) return;
-    void getLatestPracticeSession().then((row) => {
-      if (!row) return;
-      setSession(row);
+    void (async () => {
+      const practice = await getLatestPracticeSession();
+      let latest: any = practice ? { kind: "practice", ...practice } : null;
+      for (let i = 0; i < window.localStorage.length; i += 1) {
+        const key = window.localStorage.key(i);
+        if (!key?.startsWith("eklavya.mock.v2.")) continue;
+        try {
+          const saved = JSON.parse(window.localStorage.getItem(key) ?? "null") as { startedAt?: number; order?: unknown[]; answers?: Record<string, number> };
+          if (!Array.isArray(saved?.order) || !saved.order.length || !saved.startedAt) continue;
+          const parts = key.split(".");
+          const subjectId = parts[3];
+          const test = parts[4];
+          if (!subjectId || !test) continue;
+          const mock = { kind: "mock", subject_id: subjectId, test_no: Number(test), question_order: saved.order, answers: saved.answers ?? {}, started_at: saved.startedAt };
+          if (!latest || mock.started_at > new Date(latest.last_practiced_at ?? 0).getTime()) latest = mock;
+        } catch { /* ignore corrupt local autosave */ }
+      }
+      if (!latest) return;
+      setSession(latest);
       void fetchLookupMaps().then(setMaps);
-    });
+    })();
   }, [user]);
   if (!session) return null;
   const subjectName = maps?.subjects[session.subject_id]?.name ?? "Practice";
-  const chapterName = maps?.chapters[session.chapter_id]?.name ?? "Your latest session";
+  const isMock = session.kind === "mock";
+  const chapterName = isMock ? `Full Mock Test ${session.test_no}` : maps?.chapters[session.chapter_id]?.name ?? "Your latest session";
   const total = Array.isArray(session.question_order) ? session.question_order.length : 0;
-  const progress = total ? Math.min(100, Math.round(((session.last_question_index + (session.revealed ? 1 : 0)) / total) * 100)) : 0;
+  const progress = isMock ? (total ? Math.round(Object.keys(session.answers ?? {}).length / total * 100) : 8) : total ? Math.min(100, Math.round(((session.last_question_index + (session.revealed ? 1 : 0)) / total) * 100)) : 0;
   return (
     <Link
-      to="/practice/$subject/$chapter/$set"
-      params={{ subject: session.subject_id, chapter: session.chapter_id, set: String(session.set_number ?? 1) }}
+      to={isMock ? "/mock-test/$subject/$test" : "/practice/$subject/$chapter/$set"}
+      params={isMock ? { subject: session.subject_id, test: String(session.test_no) } : { subject: session.subject_id, chapter: session.chapter_id, set: String(session.set_number ?? 1) }}
       className="bg-gradient-primary shadow-glow group flex w-full items-center gap-4 rounded-2xl p-4 text-left"
     >
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
@@ -209,7 +226,7 @@ function ContinueCard() {
           Continue practice
         </p>
         <p className="truncate font-display text-sm font-bold text-white">
-          {subjectName} · {chapterName} · Q {Math.min(session.last_question_index + 1, total)}/{total}
+          {subjectName} · {chapterName}{isMock ? " · Resume" : ` · Q ${Math.min(session.last_question_index + 1, total)}/${total}`}
         </p>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15">
           <div className="h-full rounded-full bg-gold" style={{ width: `${progress}%` }} />

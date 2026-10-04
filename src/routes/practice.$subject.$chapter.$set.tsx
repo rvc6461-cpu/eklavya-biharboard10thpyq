@@ -43,6 +43,7 @@ function PracticeSetSession() {
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [sessionCorrect, setSessionCorrect] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, number>>({});
   const [done, setDone] = useState(false);
   const [restored, setRestored] = useState(false);
 
@@ -73,9 +74,11 @@ function PracticeSetSession() {
       if (savedOrder.length === questions.length) {
         const current = savedOrder[Number(saved.last_question_index) || 0];
         setIdx(Math.max(0, Math.min(savedOrder.length - 1, Number(saved.last_question_index) || 0)));
+        const savedAnswers = (saved.answers ?? {}) as Record<string, number>;
+        setAnswers(savedAnswers);
         setSelected(saved.selected_option);
         setRevealed(saved.revealed);
-        setSessionCorrect(Object.values(saved.answers as Record<string, number>).filter((answer, i) => answer === questions[savedOrder[i]]?.answer).length);
+        setSessionCorrect(Object.entries(savedAnswers).filter(([questionId, answer]) => questions.find((q) => q.id === questionId)?.answer === answer).length);
         if (current < 0) setIdx(0);
       }
       setRestored(true);
@@ -88,10 +91,10 @@ function PracticeSetSession() {
     void upsertPracticeSession({
       subjectId: subject.id, chapterId: chapter.id, setNumber,
       lastQuestionIndex: idx, questionOrder: order.map((i) => questions[i].id),
-      answers: selected == null ? {} : { [question.id]: selected }, selectedOption: selected,
+      answers, selectedOption: selected,
       revealed, shuffle, shuffleSeed,
     });
-  }, [restored, done, subject.id, chapter.id, setNumber, idx, order, questions, question, selected, revealed, shuffle, shuffleSeed]);
+  }, [restored, done, subject.id, chapter.id, setNumber, idx, order, questions, question, selected, answers, revealed, shuffle, shuffleSeed]);
 
   useEffect(() => {
     if (done) {
@@ -102,7 +105,7 @@ function PracticeSetSession() {
   }, [done, sessionCorrect, total, bestKey, subject.id, chapter.id, setNumber, idx, order, questions, shuffle, shuffleSeed]);
 
   const resetSession = (reshuffle = false) => {
-    setIdx(0); setSelected(null); setRevealed(false);
+    setIdx(0); setSelected(null); setRevealed(false); setAnswers({});
     setSessionCorrect(0); setDone(false);
     if (reshuffle && shuffle) setShuffleSeed(Date.now());
   };
@@ -121,6 +124,7 @@ function PracticeSetSession() {
   const choose = (i: number) => {
     if (revealed) return;
     setSelected(i);
+    setAnswers((previous) => ({ ...previous, [question.id]: i }));
     const correct = i === question.answer;
     if (correct) setSessionCorrect((c) => c + 1);
     setRevealed(true);
@@ -143,7 +147,7 @@ function PracticeSetSession() {
     const nextOn = !shuffle;
     setShuffle(nextOn);
     setShuffleSeed(nextOn ? Date.now() : 0);
-    setIdx(0); setSelected(null); setRevealed(false); setSessionCorrect(0);
+    setIdx(0); setSelected(null); setRevealed(false); setSessionCorrect(0); setAnswers({});
   };
 
   const isBookmarked = state.bookmarks.includes(question.id);
