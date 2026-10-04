@@ -191,10 +191,13 @@ function ContinueCard() {
         const key = window.localStorage.key(i);
         if (!key?.startsWith("eklavya.mock.v2.")) continue;
         try {
-          const saved = JSON.parse(window.localStorage.getItem(key) ?? "null") as { startedAt?: number; order?: unknown[] };
+          const saved = JSON.parse(window.localStorage.getItem(key) ?? "null") as { startedAt?: number; order?: unknown[]; answers?: Record<string, number> };
           if (!Array.isArray(saved?.order) || !saved.order.length || !saved.startedAt) continue;
-          const [, , subjectId, test] = key.split(".");
-          const mock = { kind: "mock", subject_id: subjectId, test_no: Number(test), question_order: saved.order, started_at: saved.startedAt };
+          const parts = key.split(".");
+          const subjectId = parts[3];
+          const test = parts[4];
+          if (!subjectId || !test) continue;
+          const mock = { kind: "mock", subject_id: subjectId, test_no: Number(test), question_order: saved.order, answers: saved.answers ?? {}, started_at: saved.startedAt };
           if (!latest || mock.started_at > new Date(latest.last_practiced_at ?? 0).getTime()) latest = mock;
         } catch { /* ignore corrupt local autosave */ }
       }
@@ -208,7 +211,7 @@ function ContinueCard() {
   const isMock = session.kind === "mock";
   const chapterName = isMock ? `Full Mock Test ${session.test_no}` : maps?.chapters[session.chapter_id]?.name ?? "Your latest session";
   const total = Array.isArray(session.question_order) ? session.question_order.length : 0;
-  const progress = isMock ? 0 : total ? Math.min(100, Math.round(((session.last_question_index + (session.revealed ? 1 : 0)) / total) * 100)) : 0;
+  const progress = isMock ? (total ? Math.round(Object.keys(session.answers ?? {}).length / total * 100) : 8) : total ? Math.min(100, Math.round(((session.last_question_index + (session.revealed ? 1 : 0)) / total) * 100)) : 0;
   return (
     <Link
       to={isMock ? "/mock-test/$subject/$test" : "/practice/$subject/$chapter/$set"}
@@ -226,7 +229,7 @@ function ContinueCard() {
           {subjectName} · {chapterName}{isMock ? " · Resume" : ` · Q ${Math.min(session.last_question_index + 1, total)}/${total}`}
         </p>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15">
-          <div className="h-full rounded-full bg-gold" style={{ width: `${isMock ? 8 : progress}%` }} />
+          <div className="h-full rounded-full bg-gold" style={{ width: `${progress}%` }} />
         </div>
       </div>
       <ChevronRight className="h-5 w-5 text-white/70 transition group-hover:translate-x-1" />
