@@ -9,146 +9,61 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AnalyticsRouteImport } from './routes/analytics'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as BookmarksRouteImport } from './routes/bookmarks'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as FeedbackRouteImport } from './routes/feedback'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as MistakesRouteImport } from './routes/mistakes'
-import { Route as MockTestRouteImport } from './routes/mock-test'
-import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as PracticeRouteImport } from './routes/practice'
-import { Route as PremiumRouteImport } from './routes/premium'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as ReferralRouteImport } from './routes/referral'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as SearchRouteImport } from './routes/search'
 import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
-import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
-import { Route as AdminChaptersRouteImport } from './routes/admin.chapters'
-import { Route as AdminContentRouteImport } from './routes/admin.content'
-import { Route as AdminMockTestsRouteImport } from './routes/admin.mock-tests'
-import { Route as AdminNotesRouteImport } from './routes/admin.notes'
-import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
-import { Route as AdminQuestionsRouteImport } from './routes/admin.questions'
-import { Route as AdminSubSubjectsRouteImport } from './routes/admin.sub-subjects'
-import { Route as AdminSubjectsRouteImport } from './routes/admin.subjects'
-import { Route as LibraryIndexRouteImport } from './routes/library.index'
-import { Route as LibraryFormulasRouteImport } from './routes/library.formulas'
-import { Route as MockTestIndexRouteImport } from './routes/mock-test.index'
-import { Route as MockTestSubjectRouteImport } from './routes/mock-test.$subject'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ReferralRouteImport } from './routes/referral'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as PracticeRouteImport } from './routes/practice'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as MockTestRouteImport } from './routes/mock-test'
+import { Route as MistakesRouteImport } from './routes/mistakes'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BookmarksRouteImport } from './routes/bookmarks'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as PracticeIndexRouteImport } from './routes/practice.index'
+import { Route as MockTestIndexRouteImport } from './routes/mock-test.index'
+import { Route as LibraryIndexRouteImport } from './routes/library.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PracticeSubjectRouteImport } from './routes/practice.$subject'
-import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
-import { Route as LibraryNotesIndexRouteImport } from './routes/library.notes.index'
-import { Route as LibraryNotesSubjectRouteImport } from './routes/library.notes.$subject'
-import { Route as LibraryPapersSubjectRouteImport } from './routes/library.papers.$subject'
-import { Route as LibraryViewIdRouteImport } from './routes/library.view.$id'
-import { Route as MockTestSubjectIndexRouteImport } from './routes/mock-test.$subject.index'
-import { Route as MockTestSubjectTestRouteImport } from './routes/mock-test.$subject.$test'
+import { Route as MockTestSubjectRouteImport } from './routes/mock-test.$subject'
+import { Route as LibraryFormulasRouteImport } from './routes/library.formulas'
+import { Route as AdminSubjectsRouteImport } from './routes/admin.subjects'
+import { Route as AdminSubSubjectsRouteImport } from './routes/admin.sub-subjects'
+import { Route as AdminQuestionsRouteImport } from './routes/admin.questions'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminNotesRouteImport } from './routes/admin.notes'
+import { Route as AdminMockTestsRouteImport } from './routes/admin.mock-tests'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminChaptersRouteImport } from './routes/admin.chapters'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as PracticeSubjectIndexRouteImport } from './routes/practice.$subject.index'
+import { Route as MockTestSubjectIndexRouteImport } from './routes/mock-test.$subject.index'
+import { Route as LibraryNotesIndexRouteImport } from './routes/library.notes.index'
 import { Route as PracticeSubjectChapterRouteImport } from './routes/practice.$subject.$chapter'
+import { Route as MockTestSubjectTestRouteImport } from './routes/mock-test.$subject.$test'
+import { Route as LibraryViewIdRouteImport } from './routes/library.view.$id'
+import { Route as LibraryPapersSubjectRouteImport } from './routes/library.papers.$subject'
+import { Route as LibraryNotesSubjectRouteImport } from './routes/library.notes.$subject'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as PracticeSubjectChapterIndexRouteImport } from './routes/practice.$subject.$chapter.index'
-import { Route as PracticeSubjectChapterSetRouteImport } from './routes/practice.$subject.$chapter.$set'
 import { Route as PracticeSubjectGroupSubsubjectRouteImport } from './routes/practice.$subject.group.$subsubject'
+import { Route as PracticeSubjectChapterSetRouteImport } from './routes/practice.$subject.$chapter.$set'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AnalyticsRoute = AnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookmarksRoute = BookmarksRouteImport.update({
-  id: '/bookmarks',
-  path: '/bookmarks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedbackRoute = FeedbackRouteImport.update({
-  id: '/feedback',
-  path: '/feedback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MistakesRoute = MistakesRouteImport.update({
-  id: '/mistakes',
-  path: '/mistakes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MockTestRoute = MockTestRouteImport.update({
-  id: '/mock-test',
-  path: '/mock-test',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PracticeRoute = PracticeRouteImport.update({
-  id: '/practice',
-  path: '/practice',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PremiumRoute = PremiumRouteImport.update({
-  id: '/premium',
-  path: '/premium',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReferralRoute = ReferralRouteImport.update({
-  id: '/referral',
-  path: '/referral',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SearchRoute = SearchRouteImport.update({
@@ -156,61 +71,134 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const ReferralRoute = ReferralRouteImport.update({
+  id: '/referral',
+  path: '/referral',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PracticeRoute = PracticeRouteImport.update({
+  id: '/practice',
+  path: '/practice',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MockTestRoute = MockTestRouteImport.update({
+  id: '/mock-test',
+  path: '/mock-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MistakesRoute = MistakesRouteImport.update({
+  id: '/mistakes',
+  path: '/mistakes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookmarksRoute = BookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PracticeIndexRoute = PracticeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PracticeRoute,
+} as any)
+const MockTestIndexRoute = MockTestIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => MockTestRoute,
+} as any)
+const LibraryIndexRoute = LibraryIndexRouteImport.update({
+  id: '/library/',
+  path: '/library/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AdminRoute,
+const PracticeSubjectRoute = PracticeSubjectRouteImport.update({
+  id: '/$subject',
+  path: '/$subject',
+  getParentRoute: () => PracticeRoute,
 } as any)
-const AdminChaptersRoute = AdminChaptersRouteImport.update({
-  id: '/chapters',
-  path: '/chapters',
-  getParentRoute: () => AdminRoute,
+const MockTestSubjectRoute = MockTestSubjectRouteImport.update({
+  id: '/$subject',
+  path: '/$subject',
+  getParentRoute: () => MockTestRoute,
 } as any)
-const AdminContentRoute = AdminContentRouteImport.update({
-  id: '/content',
-  path: '/content',
-  getParentRoute: () => AdminRoute,
+const LibraryFormulasRoute = LibraryFormulasRouteImport.update({
+  id: '/library/formulas',
+  path: '/library/formulas',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AdminMockTestsRoute = AdminMockTestsRouteImport.update({
-  id: '/mock-tests',
-  path: '/mock-tests',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminNotesRoute = AdminNotesRouteImport.update({
-  id: '/notes',
-  path: '/notes',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminQuestionsRoute = AdminQuestionsRouteImport.update({
-  id: '/questions',
-  path: '/questions',
+const AdminSubjectsRoute = AdminSubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSubSubjectsRoute = AdminSubSubjectsRouteImport.update({
@@ -218,44 +206,91 @@ const AdminSubSubjectsRoute = AdminSubSubjectsRouteImport.update({
   path: '/sub-subjects',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminSubjectsRoute = AdminSubjectsRouteImport.update({
-  id: '/subjects',
-  path: '/subjects',
+const AdminQuestionsRoute = AdminQuestionsRouteImport.update({
+  id: '/questions',
+  path: '/questions',
   getParentRoute: () => AdminRoute,
 } as any)
-const LibraryIndexRoute = LibraryIndexRouteImport.update({
-  id: '/library/',
-  path: '/library/',
-  getParentRoute: () => rootRouteImport,
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
 } as any)
-const LibraryFormulasRoute = LibraryFormulasRouteImport.update({
-  id: '/library/formulas',
-  path: '/library/formulas',
-  getParentRoute: () => rootRouteImport,
+const AdminNotesRoute = AdminNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AdminRoute,
 } as any)
-const MockTestIndexRoute = MockTestIndexRouteImport.update({
+const AdminMockTestsRoute = AdminMockTestsRouteImport.update({
+  id: '/mock-tests',
+  path: '/mock-tests',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminChaptersRoute = AdminChaptersRouteImport.update({
+  id: '/chapters',
+  path: '/chapters',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PracticeSubjectIndexRoute = PracticeSubjectIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => MockTestRoute,
+  getParentRoute: () => PracticeSubjectRoute,
 } as any)
-const MockTestSubjectRoute = MockTestSubjectRouteImport.update({
-  id: '/$subject',
-  path: '/$subject',
-  getParentRoute: () => MockTestRoute,
-} as any)
-const PracticeIndexRoute = PracticeIndexRouteImport.update({
+const MockTestSubjectIndexRoute = MockTestSubjectIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => PracticeRoute,
+  getParentRoute: () => MockTestSubjectRoute,
 } as any)
-const PracticeSubjectRoute = PracticeSubjectRouteImport.update({
-  id: '/$subject',
-  path: '/$subject',
-  getParentRoute: () => PracticeRoute,
+const LibraryNotesIndexRoute = LibraryNotesIndexRouteImport.update({
+  id: '/library/notes/',
+  path: '/library/notes/',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
-  id: '/.lovable/oauth/consent',
-  path: '/.lovable/oauth/consent',
+const PracticeSubjectChapterRoute = PracticeSubjectChapterRouteImport.update({
+  id: '/$chapter',
+  path: '/$chapter',
+  getParentRoute: () => PracticeSubjectRoute,
+} as any)
+const MockTestSubjectTestRoute = MockTestSubjectTestRouteImport.update({
+  id: '/$test',
+  path: '/$test',
+  getParentRoute: () => MockTestSubjectRoute,
+} as any)
+const LibraryViewIdRoute = LibraryViewIdRouteImport.update({
+  id: '/library/view/$id',
+  path: '/library/view/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryPapersSubjectRoute = LibraryPapersSubjectRouteImport.update({
+  id: '/library/papers/$subject',
+  path: '/library/papers/$subject',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryNotesSubjectRoute = LibraryNotesSubjectRouteImport.update({
+  id: '/library/notes/$subject',
+  path: '/library/notes/$subject',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
@@ -264,45 +299,10 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
-const LibraryNotesIndexRoute = LibraryNotesIndexRouteImport.update({
-  id: '/library/notes/',
-  path: '/library/notes/',
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
-} as any)
-const LibraryNotesSubjectRoute = LibraryNotesSubjectRouteImport.update({
-  id: '/library/notes/$subject',
-  path: '/library/notes/$subject',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LibraryPapersSubjectRoute = LibraryPapersSubjectRouteImport.update({
-  id: '/library/papers/$subject',
-  path: '/library/papers/$subject',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LibraryViewIdRoute = LibraryViewIdRouteImport.update({
-  id: '/library/view/$id',
-  path: '/library/view/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MockTestSubjectIndexRoute = MockTestSubjectIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => MockTestSubjectRoute,
-} as any)
-const MockTestSubjectTestRoute = MockTestSubjectTestRouteImport.update({
-  id: '/$test',
-  path: '/$test',
-  getParentRoute: () => MockTestSubjectRoute,
-} as any)
-const PracticeSubjectIndexRoute = PracticeSubjectIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PracticeSubjectRoute,
-} as any)
-const PracticeSubjectChapterRoute = PracticeSubjectChapterRouteImport.update({
-  id: '/$chapter',
-  path: '/$chapter',
-  getParentRoute: () => PracticeSubjectRoute,
 } as any)
 const PracticeSubjectChapterIndexRoute =
   PracticeSubjectChapterIndexRouteImport.update({
@@ -310,17 +310,17 @@ const PracticeSubjectChapterIndexRoute =
     path: '/',
     getParentRoute: () => PracticeSubjectChapterRoute,
   } as any)
-const PracticeSubjectChapterSetRoute =
-  PracticeSubjectChapterSetRouteImport.update({
-    id: '/$set',
-    path: '/$set',
-    getParentRoute: () => PracticeSubjectChapterRoute,
-  } as any)
 const PracticeSubjectGroupSubsubjectRoute =
   PracticeSubjectGroupSubsubjectRouteImport.update({
     id: '/group/$subsubject',
     path: '/group/$subsubject',
     getParentRoute: () => PracticeSubjectRoute,
+  } as any)
+const PracticeSubjectChapterSetRoute =
+  PracticeSubjectChapterSetRouteImport.update({
+    id: '/$set',
+    path: '/$set',
+    getParentRoute: () => PracticeSubjectChapterRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -668,130 +668,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/analytics': {
-      id: '/analytics'
-      path: '/analytics'
-      fullPath: '/analytics'
-      preLoaderRoute: typeof AnalyticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bookmarks': {
-      id: '/bookmarks'
-      path: '/bookmarks'
-      fullPath: '/bookmarks'
-      preLoaderRoute: typeof BookmarksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feedback': {
-      id: '/feedback'
-      path: '/feedback'
-      fullPath: '/feedback'
-      preLoaderRoute: typeof FeedbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mistakes': {
-      id: '/mistakes'
-      path: '/mistakes'
-      fullPath: '/mistakes'
-      preLoaderRoute: typeof MistakesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mock-test': {
-      id: '/mock-test'
-      path: '/mock-test'
-      fullPath: '/mock-test'
-      preLoaderRoute: typeof MockTestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notifications': {
-      id: '/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof NotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/practice': {
-      id: '/practice'
-      path: '/practice'
-      fullPath: '/practice'
-      preLoaderRoute: typeof PracticeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/premium': {
-      id: '/premium'
-      path: '/premium'
-      fullPath: '/premium'
-      preLoaderRoute: typeof PremiumRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/referral': {
-      id: '/referral'
-      path: '/referral'
-      fullPath: '/referral'
-      preLoaderRoute: typeof ReferralRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/search': {
@@ -801,25 +682,151 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.mcp/list-tools': {
-      id: '/.mcp/list-tools'
-      path: '/.mcp/list-tools'
-      fullPath: '/.mcp/list-tools'
-      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+    '/referral': {
+      id: '/referral'
+      path: '/referral'
+      fullPath: '/referral'
+      preLoaderRoute: typeof ReferralRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/practice': {
+      id: '/practice'
+      path: '/practice'
+      fullPath: '/practice'
+      preLoaderRoute: typeof PracticeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mock-test': {
+      id: '/mock-test'
+      path: '/mock-test'
+      fullPath: '/mock-test'
+      preLoaderRoute: typeof MockTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mistakes': {
+      id: '/mistakes'
+      path: '/mistakes'
+      fullPath: '/mistakes'
+      preLoaderRoute: typeof MistakesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bookmarks': {
+      id: '/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof BookmarksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/practice/': {
+      id: '/practice/'
+      path: '/'
+      fullPath: '/practice/'
+      preLoaderRoute: typeof PracticeIndexRouteImport
+      parentRoute: typeof PracticeRoute
+    }
+    '/mock-test/': {
+      id: '/mock-test/'
+      path: '/'
+      fullPath: '/mock-test/'
+      preLoaderRoute: typeof MockTestIndexRouteImport
+      parentRoute: typeof MockTestRoute
+    }
+    '/library/': {
+      id: '/library/'
+      path: '/library'
+      fullPath: '/library/'
+      preLoaderRoute: typeof LibraryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -829,53 +836,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/analytics': {
-      id: '/admin/analytics'
-      path: '/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsRouteImport
-      parentRoute: typeof AdminRoute
+    '/practice/$subject': {
+      id: '/practice/$subject'
+      path: '/$subject'
+      fullPath: '/practice/$subject'
+      preLoaderRoute: typeof PracticeSubjectRouteImport
+      parentRoute: typeof PracticeRoute
     }
-    '/admin/chapters': {
-      id: '/admin/chapters'
-      path: '/chapters'
-      fullPath: '/admin/chapters'
-      preLoaderRoute: typeof AdminChaptersRouteImport
-      parentRoute: typeof AdminRoute
+    '/mock-test/$subject': {
+      id: '/mock-test/$subject'
+      path: '/$subject'
+      fullPath: '/mock-test/$subject'
+      preLoaderRoute: typeof MockTestSubjectRouteImport
+      parentRoute: typeof MockTestRoute
     }
-    '/admin/content': {
-      id: '/admin/content'
-      path: '/content'
-      fullPath: '/admin/content'
-      preLoaderRoute: typeof AdminContentRouteImport
-      parentRoute: typeof AdminRoute
+    '/library/formulas': {
+      id: '/library/formulas'
+      path: '/library/formulas'
+      fullPath: '/library/formulas'
+      preLoaderRoute: typeof LibraryFormulasRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/mock-tests': {
-      id: '/admin/mock-tests'
-      path: '/mock-tests'
-      fullPath: '/admin/mock-tests'
-      preLoaderRoute: typeof AdminMockTestsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/notes': {
-      id: '/admin/notes'
-      path: '/notes'
-      fullPath: '/admin/notes'
-      preLoaderRoute: typeof AdminNotesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/notifications': {
-      id: '/admin/notifications'
-      path: '/notifications'
-      fullPath: '/admin/notifications'
-      preLoaderRoute: typeof AdminNotificationsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/questions': {
-      id: '/admin/questions'
-      path: '/questions'
-      fullPath: '/admin/questions'
-      preLoaderRoute: typeof AdminQuestionsRouteImport
+    '/admin/subjects': {
+      id: '/admin/subjects'
+      path: '/subjects'
+      fullPath: '/admin/subjects'
+      preLoaderRoute: typeof AdminSubjectsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/sub-subjects': {
@@ -885,68 +871,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSubSubjectsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/subjects': {
-      id: '/admin/subjects'
-      path: '/subjects'
-      fullPath: '/admin/subjects'
-      preLoaderRoute: typeof AdminSubjectsRouteImport
+    '/admin/questions': {
+      id: '/admin/questions'
+      path: '/questions'
+      fullPath: '/admin/questions'
+      preLoaderRoute: typeof AdminQuestionsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/library/': {
-      id: '/library/'
-      path: '/library'
-      fullPath: '/library/'
-      preLoaderRoute: typeof LibraryIndexRouteImport
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notes': {
+      id: '/admin/notes'
+      path: '/notes'
+      fullPath: '/admin/notes'
+      preLoaderRoute: typeof AdminNotesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/mock-tests': {
+      id: '/admin/mock-tests'
+      path: '/mock-tests'
+      fullPath: '/admin/mock-tests'
+      preLoaderRoute: typeof AdminMockTestsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/chapters': {
+      id: '/admin/chapters'
+      path: '/chapters'
+      fullPath: '/admin/chapters'
+      preLoaderRoute: typeof AdminChaptersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/library/formulas': {
-      id: '/library/formulas'
-      path: '/library/formulas'
-      fullPath: '/library/formulas'
-      preLoaderRoute: typeof LibraryFormulasRouteImport
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mock-test/': {
-      id: '/mock-test/'
+    '/practice/$subject/': {
+      id: '/practice/$subject/'
       path: '/'
-      fullPath: '/mock-test/'
-      preLoaderRoute: typeof MockTestIndexRouteImport
-      parentRoute: typeof MockTestRoute
+      fullPath: '/practice/$subject/'
+      preLoaderRoute: typeof PracticeSubjectIndexRouteImport
+      parentRoute: typeof PracticeSubjectRoute
     }
-    '/mock-test/$subject': {
-      id: '/mock-test/$subject'
-      path: '/$subject'
-      fullPath: '/mock-test/$subject'
-      preLoaderRoute: typeof MockTestSubjectRouteImport
-      parentRoute: typeof MockTestRoute
-    }
-    '/practice/': {
-      id: '/practice/'
+    '/mock-test/$subject/': {
+      id: '/mock-test/$subject/'
       path: '/'
-      fullPath: '/practice/'
-      preLoaderRoute: typeof PracticeIndexRouteImport
-      parentRoute: typeof PracticeRoute
-    }
-    '/practice/$subject': {
-      id: '/practice/$subject'
-      path: '/$subject'
-      fullPath: '/practice/$subject'
-      preLoaderRoute: typeof PracticeSubjectRouteImport
-      parentRoute: typeof PracticeRoute
-    }
-    '/.lovable/oauth/consent': {
-      id: '/.lovable/oauth/consent'
-      path: '/.lovable/oauth/consent'
-      fullPath: '/.lovable/oauth/consent'
-      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
-      parentRoute: typeof rootRouteImport
+      fullPath: '/mock-test/$subject/'
+      preLoaderRoute: typeof MockTestSubjectIndexRouteImport
+      parentRoute: typeof MockTestSubjectRoute
     }
     '/library/notes/': {
       id: '/library/notes/'
@@ -955,11 +955,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryNotesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/library/notes/$subject': {
-      id: '/library/notes/$subject'
-      path: '/library/notes/$subject'
-      fullPath: '/library/notes/$subject'
-      preLoaderRoute: typeof LibraryNotesSubjectRouteImport
+    '/practice/$subject/$chapter': {
+      id: '/practice/$subject/$chapter'
+      path: '/$chapter'
+      fullPath: '/practice/$subject/$chapter'
+      preLoaderRoute: typeof PracticeSubjectChapterRouteImport
+      parentRoute: typeof PracticeSubjectRoute
+    }
+    '/mock-test/$subject/$test': {
+      id: '/mock-test/$subject/$test'
+      path: '/$test'
+      fullPath: '/mock-test/$subject/$test'
+      preLoaderRoute: typeof MockTestSubjectTestRouteImport
+      parentRoute: typeof MockTestSubjectRoute
+    }
+    '/library/view/$id': {
+      id: '/library/view/$id'
+      path: '/library/view/$id'
+      fullPath: '/library/view/$id'
+      preLoaderRoute: typeof LibraryViewIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library/papers/$subject': {
@@ -969,40 +983,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LibraryPapersSubjectRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/library/view/$id': {
-      id: '/library/view/$id'
-      path: '/library/view/$id'
-      fullPath: '/library/view/$id'
-      preLoaderRoute: typeof LibraryViewIdRouteImport
+    '/library/notes/$subject': {
+      id: '/library/notes/$subject'
+      path: '/library/notes/$subject'
+      fullPath: '/library/notes/$subject'
+      preLoaderRoute: typeof LibraryNotesSubjectRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mock-test/$subject/': {
-      id: '/mock-test/$subject/'
-      path: '/'
-      fullPath: '/mock-test/$subject/'
-      preLoaderRoute: typeof MockTestSubjectIndexRouteImport
-      parentRoute: typeof MockTestSubjectRoute
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/mock-test/$subject/$test': {
-      id: '/mock-test/$subject/$test'
-      path: '/$test'
-      fullPath: '/mock-test/$subject/$test'
-      preLoaderRoute: typeof MockTestSubjectTestRouteImport
-      parentRoute: typeof MockTestSubjectRoute
-    }
-    '/practice/$subject/': {
-      id: '/practice/$subject/'
-      path: '/'
-      fullPath: '/practice/$subject/'
-      preLoaderRoute: typeof PracticeSubjectIndexRouteImport
-      parentRoute: typeof PracticeSubjectRoute
-    }
-    '/practice/$subject/$chapter': {
-      id: '/practice/$subject/$chapter'
-      path: '/$chapter'
-      fullPath: '/practice/$subject/$chapter'
-      preLoaderRoute: typeof PracticeSubjectChapterRouteImport
-      parentRoute: typeof PracticeSubjectRoute
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/practice/$subject/$chapter/': {
       id: '/practice/$subject/$chapter/'
@@ -1011,19 +1011,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PracticeSubjectChapterIndexRouteImport
       parentRoute: typeof PracticeSubjectChapterRoute
     }
-    '/practice/$subject/$chapter/$set': {
-      id: '/practice/$subject/$chapter/$set'
-      path: '/$set'
-      fullPath: '/practice/$subject/$chapter/$set'
-      preLoaderRoute: typeof PracticeSubjectChapterSetRouteImport
-      parentRoute: typeof PracticeSubjectChapterRoute
-    }
     '/practice/$subject/group/$subsubject': {
       id: '/practice/$subject/group/$subsubject'
       path: '/group/$subsubject'
       fullPath: '/practice/$subject/group/$subsubject'
       preLoaderRoute: typeof PracticeSubjectGroupSubsubjectRouteImport
       parentRoute: typeof PracticeSubjectRoute
+    }
+    '/practice/$subject/$chapter/$set': {
+      id: '/practice/$subject/$chapter/$set'
+      path: '/$set'
+      fullPath: '/practice/$subject/$chapter/$set'
+      preLoaderRoute: typeof PracticeSubjectChapterSetRouteImport
+      parentRoute: typeof PracticeSubjectChapterRoute
     }
   }
 }
