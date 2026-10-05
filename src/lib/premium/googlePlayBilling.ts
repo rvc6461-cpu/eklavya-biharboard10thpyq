@@ -26,6 +26,10 @@ function getBillingBridge() {
   return window.eklavyaGooglePlayBilling ?? null;
 }
 
+export function hasGooglePlayBillingBridge() {
+  return getBillingBridge() !== null;
+}
+
 export async function startGooglePlayPurchase(): Promise<GooglePlayBillingResult> {
   const bridge = getBillingBridge();
   if (!bridge) return { status: "unavailable" };
