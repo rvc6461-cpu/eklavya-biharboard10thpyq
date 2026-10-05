@@ -310,9 +310,14 @@ function ProfilePage() {
               </div>
             </div>
             {!profile?.is_premium && (
-              <Link to="/referral" className="rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-black">
-                Refer to unlock
-              </Link>
+              <div className="flex flex-col items-end gap-1.5">
+                <Link to="/premium" className="rounded-full bg-gold px-3 py-1.5 text-xs font-semibold text-black">
+                  Unlock – ₹99
+                </Link>
+                <Link to="/referral" className="text-[10px] font-semibold text-muted-foreground">
+                  Refer to unlock free
+                </Link>
+              </div>
             )}
           </div>
         </section>

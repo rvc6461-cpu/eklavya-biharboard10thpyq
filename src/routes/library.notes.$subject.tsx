@@ -6,6 +6,7 @@ import { fetchSubjectById, type DbSubject } from "@/lib/pyq/db";
 import { fetchResources, type LibraryResource } from "@/lib/pyq/library";
 import { EmptyState, ResourceRow } from "@/components/library/ResourceRow";
 import { useAuth, useProfile } from "@/hooks/useAuth";
+import { PremiumPurchaseOptions } from "@/components/premium/PremiumPurchaseOptions";
 
 export const Route = createFileRoute("/library/notes/$subject")({
   head: () => ({
@@ -56,6 +57,9 @@ function SubjectNotes() {
         </header>
 
         <main className="space-y-3 px-5">
+          {profile?.is_premium !== true && rows?.some((resource) => resource.is_premium) && (
+            <PremiumPurchaseOptions compact />
+          )}
           {rows === null ? (
             <p className="text-center text-xs text-muted-foreground">Loading…</p>
           ) : rows.length === 0 ? (

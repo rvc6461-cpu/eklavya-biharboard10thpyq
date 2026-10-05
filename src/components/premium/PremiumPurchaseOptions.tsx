@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Check, Crown, RotateCcw } from "lucide-react";
+import { Crown, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   hasGooglePlayBillingBridge,

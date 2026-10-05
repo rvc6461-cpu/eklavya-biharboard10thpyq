@@ -51,9 +51,13 @@ export function ResourceRow({
         </p>
       </div>
       {locked ? (
-        <span className="inline-flex items-center gap-1 rounded-xl border border-gold/40 px-2.5 py-1.5 text-[11px] font-bold text-gold">
-          <Crown className="h-3.5 w-3.5" /> Premium
-        </span>
+        <Link
+          to="/premium"
+          className="inline-flex items-center gap-1 rounded-xl border border-gold/40 px-2.5 py-1.5 text-[11px] font-bold text-gold"
+          aria-label="Unlock Premium"
+        >
+          <Crown className="h-3.5 w-3.5" /> Unlock
+        </Link>
       ) : (
         <div className="flex items-center gap-1.5">
           <Link
