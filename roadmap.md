@@ -12,3 +12,8 @@
 - [x] Align homepage statistics with Analytics without loading-zero flashes.
 - [x] Resume latest unfinished practice or mock session with saved state.
 - [x] Add persisted Light/Dark appearance settings while preserving current dark theme.
+
+## Premium purchase preparation
+- [ ] Add Google Play Billing-ready one-time Premium option without simulating a purchase.
+- [ ] Surface the option from existing locked Premium/handwritten-notes entry points.
+- [ ] Verify the preview clearly reports billing unavailable and never grants access.
