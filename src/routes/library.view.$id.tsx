@@ -9,6 +9,7 @@ import {
   type LibraryResource,
 } from "@/lib/pyq/library";
 import { useAuth, useProfile } from "@/hooks/useAuth";
+import { PremiumPurchaseOptions } from "@/components/premium/PremiumPurchaseOptions";
 
 export const Route = createFileRoute("/library/view/$id")({
   head: () => ({
@@ -119,6 +120,9 @@ function ViewerPage() {
               <p className="mt-1 text-xs text-muted-foreground">
                 Unlock Eklavya Premium to read handwritten notes.
               </p>
+              <div className="mt-4 text-left">
+                <PremiumPurchaseOptions compact />
+              </div>
             </div>
           </div>
         ) : url ? (
