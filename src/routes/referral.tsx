@@ -3,6 +3,7 @@ import { ArrowLeft, Check, Clipboard, Gift, Link2, Share2, Sparkles, Users } fro
 import { useEffect, useState } from "react";
 import { useAuth, useProfile } from "@/hooks/useAuth";
 import { copyText, getReferralData, shareText, type ReferralHistoryItem } from "@/lib/phase4b";
+import { PremiumPurchaseOptions } from "@/components/premium/PremiumPurchaseOptions";
 
 export const Route = createFileRoute("/referral")({
   ssr: false,
@@ -60,6 +61,7 @@ function ReferralPage() {
           <div className="mt-4 grid grid-cols-10 gap-1">{Array.from({ length: 10 }, (_, i) => <div key={i} className={`h-2 rounded-full ${i < progress ? "bg-gold" : "bg-muted"}`} />)}</div>
           <p className="mt-3 text-xs text-muted-foreground">{unlocked ? "Lifetime Premium is unlocked." : `${10 - progress} more verified referral${10 - progress === 1 ? "" : "s"} to go.`}</p>
         </section>
+        {!unlocked && <PremiumPurchaseOptions compact />}
         {unlocked && <section className="rounded-2xl border border-success/30 bg-success/10 p-4"><div className="flex items-center gap-3"><Sparkles className="h-5 w-5 text-success" /><div><p className="font-display text-sm font-bold">Congratulations!</p><p className="text-xs text-muted-foreground">You have unlocked Lifetime Premium.</p></div></div></section>}
         <section className="space-y-3">
           <div><p className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Your referral code</p><div className="mt-2 flex items-center gap-2 rounded-2xl border border-border bg-card p-3"><span className="font-display flex-1 text-lg font-bold tracking-[0.2em]">{code || "Loading…"}</span><button type="button" onClick={() => code && copyText(code).then(() => showNotice("Code copied"))} className="flex h-9 items-center gap-1.5 rounded-xl bg-primary/15 px-3 text-xs font-bold text-primary"><Clipboard className="h-4 w-4" /> Copy</button></div></div>

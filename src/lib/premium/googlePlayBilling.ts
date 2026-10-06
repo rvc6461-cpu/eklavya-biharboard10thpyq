@@ -1,4 +1,5 @@
 export const PREMIUM_PRODUCT_ID = "eklavya_premium_99";
+export const PREMIUM_PRODUCT_TYPE = "INAPP" as const;
 
 export type GooglePlayBillingResult = {
   status:
