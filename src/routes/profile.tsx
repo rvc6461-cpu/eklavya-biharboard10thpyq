@@ -32,6 +32,10 @@ export const Route = createFileRoute("/profile")({
     meta: [
       { title: "Profile – Eklavya" },
       { name: "description", content: "Your Eklavya profile, progress and study stats." },
+      { property: "og:title", content: "Profile – Eklavya Bihar Board 10th Prep" },
+      { property: "og:description", content: "View your Eklavya account, Premium status and study progress." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
