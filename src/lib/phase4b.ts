@@ -97,6 +97,24 @@ export function getDeviceToken() {
   return token;
 }
 
+export function normalizePhoneNumber(value: string): string | null {
+  const trimmed = value.trim();
+  const digits = trimmed.replace(/\D/g, "");
+  const normalized = trimmed.startsWith("+")
+    ? `+${digits}`
+    : digits.length === 10
+      ? `+91${digits}`
+      : digits.startsWith("91") && digits.length === 12
+        ? `+${digits}`
+        : `+${digits}`;
+
+  return /^\+[1-9]\d{7,14}$/.test(normalized) ? normalized : null;
+}
+
+export function matchesActiveSession(currentSessionId: string | null | undefined, activeSessionId: string | null | undefined) {
+  return Boolean(currentSessionId && activeSessionId && currentSessionId === activeSessionId);
+}
+
 export async function copyText(value: string) {
   await navigator.clipboard.writeText(value);
 }
