@@ -18,3 +18,9 @@
 - [x] Surface the option from existing locked Premium/handwritten-notes entry points.
 - [x] Verify the preview clearly reports billing unavailable and never grants access.
 - [ ] Connect a native Google Play Billing client and server-side purchase verification after the Android app and Play Console product are configured.
+
+## Phone OTP and active-device security
+- [ ] Add Supabase phone OTP sign-in/sign-up with resend cooldown and OTP error handling.
+- [ ] Enforce one active auth session per account through server/database validation without deleting user progress.
+- [ ] Validate all existing personal-data and admin RLS policies against active sessions.
+- [ ] Verify startup/resume logout messaging, current UI, and existing offline-progress tests; document SMS configuration needed.
