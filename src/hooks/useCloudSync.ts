@@ -28,8 +28,10 @@ let mergedForUser: string | null = null;
 
 async function runMerge(userId: string) {
   if (mergedForUser === userId) return;
-  mergedForUser = userId;
   setCloudUser(userId);
+  const { data: active, error } = await supabase.rpc("ensure_active_device_session");
+  if (error || !active) return;
+  mergedForUser = userId;
   await mergeOnLogin(userId, readLocal(), (next) => writeLocal(next));
 }
 
@@ -46,6 +48,14 @@ export function useCloudSync() {
       if (event === "SIGNED_IN" && uid) void runMerge(uid);
       if (event === "SIGNED_OUT") mergedForUser = null;
     });
-    return () => sub.subscription.unsubscribe();
+    const handleVerified = (event: Event) => {
+      const detail = (event as CustomEvent<{ userId?: string }>).detail;
+      if (detail?.userId) void runMerge(detail.userId);
+    };
+    window.addEventListener("eklavya:active-device:verified", handleVerified);
+    return () => {
+      window.removeEventListener("eklavya:active-device:verified", handleVerified);
+      sub.subscription.unsubscribe();
+    };
   }, []);
 }

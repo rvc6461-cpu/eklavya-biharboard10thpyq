@@ -8,12 +8,14 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useCloudSync } from "../hooks/useCloudSync";
 import { useAppearance } from "../hooks/useAppearance";
+import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
   return (
@@ -121,12 +123,71 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CloudSyncGate />
-      <AppearanceGate />
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <ActiveDeviceGate>
+        <CloudSyncGate />
+        <AppearanceGate />
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </ActiveDeviceGate>
     </QueryClientProvider>
   );
+}
+
+function ActiveDeviceGate({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    let checking = false;
+    let redirected = false;
+
+    const verify = async () => {
+      if (checking || redirected) return;
+      checking = true;
+      try {
+        const { data: sessionResult } = await supabase.auth.getSession();
+        const session = sessionResult.session;
+        if (!session) return;
+
+        const { data: active, error } = await supabase.rpc("ensure_active_device_session");
+        if (error || active === null) return;
+        if (!active) {
+          redirected = true;
+          await supabase.auth.signOut({ scope: "local" });
+          await queryClient.cancelQueries();
+          queryClient.clear();
+          await router.navigate({ to: "/auth", search: { reason: "device" } });
+          return;
+        }
+      } catch {
+        // A temporary network failure must not sign the user out.
+      } finally {
+        checking = false;
+        if (alive) setReady(true);
+      }
+    };
+
+    const handleResume = () => {
+      if (document.visibilityState === "visible") void verify();
+    };
+
+    void verify();
+    const interval = window.setInterval(() => void verify(), 30_000);
+    window.addEventListener("focus", handleResume);
+    document.addEventListener("visibilitychange", handleResume);
+
+    return () => {
+      alive = false;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", handleResume);
+      document.removeEventListener("visibilitychange", handleResume);
+    };
+  }, [queryClient, router]);
+
+  if (!ready) return <div className="min-h-screen bg-background" aria-busy="true" />;
+  return children;
 }
 
 function AppearanceGate() {

@@ -549,6 +549,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_session_id: string | null
           appearance_mode: string
           avatar_url: string | null
           created_at: string
@@ -561,6 +562,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_session_id?: string | null
           appearance_mode?: string
           avatar_url?: string | null
           created_at?: string
@@ -573,6 +575,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_session_id?: string | null
           appearance_mode?: string
           avatar_url?: string | null
           created_at?: string
@@ -839,6 +842,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_active_device_session: { Args: never; Returns: boolean }
+      ensure_active_device_session: { Args: never; Returns: boolean }
       get_or_create_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -847,6 +852,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_active_device_session: { Args: never; Returns: boolean }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
       unlock_premium_for_user: { Args: { _user_id: string }; Returns: boolean }

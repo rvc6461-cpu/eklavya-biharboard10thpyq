@@ -115,6 +115,11 @@ export function matchesActiveSession(currentSessionId: string | null | undefined
   return Boolean(currentSessionId && activeSessionId && currentSessionId === activeSessionId);
 }
 
+export function notifyActiveDeviceSessionVerified(userId: string) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("eklavya:active-device:verified", { detail: { userId } }));
+}
+
 export async function copyText(value: string) {
   await navigator.clipboard.writeText(value);
 }
