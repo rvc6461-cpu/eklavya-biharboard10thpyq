@@ -99,6 +99,7 @@ export function getDeviceToken() {
 
 export function normalizePhoneNumber(value: string): string | null {
   const trimmed = value.trim();
+  if (!/^[+\d\s().-]+$/.test(trimmed)) return null;
   const digits = trimmed.replace(/\D/g, "");
   const normalized = trimmed.startsWith("+")
     ? `+${digits}`

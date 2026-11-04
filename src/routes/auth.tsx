@@ -18,6 +18,10 @@ export const Route = createFileRoute("/auth")({
     meta: [
       { title: "Sign in – Eklavya" },
       { name: "description", content: "Sign in to Eklavya to sync bookmarks and grant access to your account." },
+      { property: "og:title", content: "Sign in – Eklavya" },
+      { property: "og:description", content: "Securely sign in to Eklavya using a phone verification code or email." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
