@@ -155,10 +155,10 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
         if (error || active === null) return;
         if (!active) {
           redirected = true;
-          await supabase.auth.signOut({ scope: "local" });
           await queryClient.cancelQueries();
           queryClient.clear();
-          await router.navigate({ to: "/auth", search: { reason: "device" } });
+          await supabase.auth.signOut({ scope: "local" });
+          await router.navigate({ to: "/auth", search: { reason: "device" }, replace: true });
           return;
         }
       } catch {

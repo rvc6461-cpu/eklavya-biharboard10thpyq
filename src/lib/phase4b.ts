@@ -99,6 +99,7 @@ export function getDeviceToken() {
 
 export function normalizePhoneNumber(value: string): string | null {
   const trimmed = value.trim();
+  if (!/^\+?[\d\s().-]+$/.test(trimmed)) return null;
   const digits = trimmed.replace(/\D/g, "");
   const normalized = trimmed.startsWith("+")
     ? `+${digits}`
@@ -109,10 +110,6 @@ export function normalizePhoneNumber(value: string): string | null {
         : `+${digits}`;
 
   return /^\+[1-9]\d{7,14}$/.test(normalized) ? normalized : null;
-}
-
-export function matchesActiveSession(currentSessionId: string | null | undefined, activeSessionId: string | null | undefined) {
-  return Boolean(currentSessionId && activeSessionId && currentSessionId === activeSessionId);
 }
 
 export function notifyActiveDeviceSessionVerified(userId: string) {
