@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { getDeviceToken, normalizePhoneNumber, notifyActiveDeviceSessionVerified } from "@/lib/phase4b";
@@ -35,7 +35,6 @@ function sanitizeNext(raw?: string): string {
 
 function AuthPage() {
   const search = useSearch({ from: "/auth" });
-  const navigate = useNavigate();
   const next = sanitizeNext(search.next);
   const referralCode = search.ref ?? (typeof window !== "undefined" ? window.localStorage.getItem("eklavya:pending-referral") ?? undefined : undefined);
 
@@ -97,13 +96,9 @@ function AuthPage() {
     setError(null);
     setInfo(null);
     try {
-      const metadata = {
-        device_token: getDeviceToken(),
-        ...(referralCode ? { referral_code: referralCode } : {}),
-      };
       const { error } = await supabase.auth.signInWithOtp({
         phone: normalizedPhone,
-        options: { shouldCreateUser: true, data: metadata },
+        options: { shouldCreateUser: true },
       });
       if (error) throw error;
       setPhone(normalizedPhone);
@@ -152,13 +147,7 @@ function AuthPage() {
       if (!normalizedPhone) throw new Error("Enter a valid mobile number.");
       const { error } = await supabase.auth.signInWithOtp({
         phone: normalizedPhone,
-        options: {
-          shouldCreateUser: true,
-          data: {
-            device_token: getDeviceToken(),
-            ...(referralCode ? { referral_code: referralCode } : {}),
-          },
-        },
+        options: { shouldCreateUser: true },
       });
       if (error) throw error;
       setOtp("");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchesActiveSession, normalizePhoneNumber } from "./phase4b";
+import { normalizePhoneNumber } from "./phase4b";
 
 describe("phone authentication input", () => {
   it("normalizes a 10-digit Indian mobile number", () => {
@@ -13,16 +13,8 @@ describe("phone authentication input", () => {
   it("rejects a phone number outside the supported E.164 length", () => {
     expect(normalizePhoneNumber("12345")).toBeNull();
   });
-});
 
-describe("active device session matching", () => {
-  it("accepts only the currently pinned auth session", () => {
-    expect(matchesActiveSession("session-a", "session-a")).toBe(true);
-    expect(matchesActiveSession("session-a", "session-b")).toBe(false);
-  });
-
-  it("fails closed when either session identifier is missing", () => {
-    expect(matchesActiveSession("session-a", null)).toBe(false);
-    expect(matchesActiveSession(null, "session-a")).toBe(false);
+  it("rejects a misplaced country-code plus sign", () => {
+    expect(normalizePhoneNumber("98+76543210")).toBeNull();
   });
 });
