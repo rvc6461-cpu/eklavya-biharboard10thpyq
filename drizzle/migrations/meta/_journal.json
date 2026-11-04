@@ -22,6 +22,13 @@
       "when": 1793778651237,
       "tag": "0002_order_active_device_by_auth_login",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793778751383,
+      "tag": "0003_hide_active_session_from_profile_api",
+      "breakpoints": true
     }
   ]
 }

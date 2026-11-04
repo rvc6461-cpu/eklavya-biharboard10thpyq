@@ -1,0 +1,2 @@
+REVOKE SELECT ON TABLE public.profiles FROM authenticated;
+GRANT SELECT (id, display_name, avatar_url, exam_year, is_premium, premium_expires_at, created_at, updated_at, premium_unlocked_at, appearance_mode) ON TABLE public.profiles TO authenticated;
