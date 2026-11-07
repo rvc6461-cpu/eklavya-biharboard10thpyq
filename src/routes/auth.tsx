@@ -212,9 +212,11 @@ function AuthPage() {
           <h1 className="mt-2 text-xl font-semibold text-foreground">
             {method === "phone" ? "Sign in with your phone" : mode === "signin" ? "Sign in to Eklavya" : "Create your Eklavya account"}
           </h1>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {method === "phone" ? "We'll send a one-time verification code." : "Required to authorize MCP clients and other integrations."}
-          </p>
+          {method === "phone" ? (
+            <p className="mt-1 text-xs text-muted-foreground">We’ll send a one-time verification code.</p>
+          ) : (
+            <p className="mt-1 text-xs text-muted-foreground">Required to authorize MCP clients and other integrations.</p>
+          )}
         </div>
         <div className="mb-4 grid grid-cols-2 rounded-md border border-border p-1 text-xs">
           <button type="button" onClick={() => { setMethod("phone"); setError(null); setInfo(null); }} className={`rounded px-3 py-2 ${method === "phone" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Phone OTP</button>

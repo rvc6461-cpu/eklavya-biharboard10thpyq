@@ -29,6 +29,13 @@
       "when": 1793778751383,
       "tag": "0003_hide_active_session_from_profile_api",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794075910859,
+      "tag": "0004_refine_active_session_claims",
+      "breakpoints": true
     }
   ]
 }
