@@ -53,9 +53,15 @@ function AuthPage() {
   useEffect(() => {
     if (search.ref && typeof window !== "undefined") window.localStorage.setItem("eklavya:pending-referral", search.ref);
     let cancelled = false;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!cancelled && data.session) {
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (cancelled || !data.session) return;
+      const { data: active, error } = await supabase.rpc("ensure_active_device_session");
+      if (cancelled) return;
+      if (!error && active) {
         window.location.href = next;
+      } else if (!error && active === false) {
+        await supabase.auth.signOut({ scope: "local" });
+        setInfo("Your account was logged in on another device.");
       }
     });
     return () => {
@@ -96,9 +102,12 @@ function AuthPage() {
     setError(null);
     setInfo(null);
     try {
+      const referralMetadata = referralCode
+        ? { referral_code: referralCode, device_token: getDeviceToken() }
+        : undefined;
       const { error } = await supabase.auth.signInWithOtp({
         phone: normalizedPhone,
-        options: { shouldCreateUser: true },
+        options: { shouldCreateUser: true, ...(referralMetadata ? { data: referralMetadata } : {}) },
       });
       if (error) throw error;
       setPhone(normalizedPhone);
@@ -145,9 +154,12 @@ function AuthPage() {
     try {
       const normalizedPhone = normalizePhoneNumber(phone);
       if (!normalizedPhone) throw new Error("Enter a valid mobile number.");
+      const referralMetadata = referralCode
+        ? { referral_code: referralCode, device_token: getDeviceToken() }
+        : undefined;
       const { error } = await supabase.auth.signInWithOtp({
         phone: normalizedPhone,
-        options: { shouldCreateUser: true },
+        options: { shouldCreateUser: true, ...(referralMetadata ? { data: referralMetadata } : {}) },
       });
       if (error) throw error;
       setOtp("");
@@ -200,9 +212,11 @@ function AuthPage() {
           <h1 className="mt-2 text-xl font-semibold text-foreground">
             {method === "phone" ? "Sign in with your phone" : mode === "signin" ? "Sign in to Eklavya" : "Create your Eklavya account"}
           </h1>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {method === "phone" ? "We'll send a one-time verification code." : "Required to authorize MCP clients and other integrations."}
-          </p>
+          {method === "phone" ? (
+            <p className="mt-1 text-xs text-muted-foreground">We’ll send a one-time verification code.</p>
+          ) : (
+            <p className="mt-1 text-xs text-muted-foreground">Required to authorize MCP clients and other integrations.</p>
+          )}
         </div>
         <div className="mb-4 grid grid-cols-2 rounded-md border border-border p-1 text-xs">
           <button type="button" onClick={() => { setMethod("phone"); setError(null); setInfo(null); }} className={`rounded px-3 py-2 ${method === "phone" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Phone OTP</button>
