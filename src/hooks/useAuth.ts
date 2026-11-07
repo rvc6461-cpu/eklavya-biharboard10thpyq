@@ -34,6 +34,8 @@ export type Profile = {
   appearance_mode: "light" | "dark" | "system";
 };
 
+const PROFILE_COLUMNS = "id,display_name,avatar_url,exam_year,is_premium,premium_expires_at,premium_unlocked_at,created_at,updated_at,appearance_mode";
+
 export function useProfile(user: User | null) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,7 +50,7 @@ export function useProfile(user: User | null) {
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("*")
+        .select(PROFILE_COLUMNS)
         .eq("id", user.id)
         .maybeSingle();
       if (cancelled) return;
@@ -61,7 +63,7 @@ export function useProfile(user: User | null) {
         const { data: inserted } = await supabase
           .from("profiles")
           .insert({ id: user.id, display_name: fallbackName })
-          .select("*")
+          .select(PROFILE_COLUMNS)
           .maybeSingle();
         if (!cancelled) setProfile((inserted as Profile) ?? null);
       } else {
@@ -80,7 +82,7 @@ export function useProfile(user: User | null) {
       .from("profiles")
       .update(patch)
       .eq("id", user.id)
-      .select("*")
+      .select(PROFILE_COLUMNS)
       .maybeSingle();
     if (data) setProfile(data as Profile);
   }
