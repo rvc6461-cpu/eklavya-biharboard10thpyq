@@ -53,9 +53,15 @@ function AuthPage() {
   useEffect(() => {
     if (search.ref && typeof window !== "undefined") window.localStorage.setItem("eklavya:pending-referral", search.ref);
     let cancelled = false;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!cancelled && data.session) {
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (cancelled || !data.session) return;
+      const { data: active, error } = await supabase.rpc("ensure_active_device_session");
+      if (cancelled) return;
+      if (!error && active) {
         window.location.href = next;
+      } else if (!error && active === false) {
+        await supabase.auth.signOut({ scope: "local" });
+        setInfo("Your account was logged in on another device.");
       }
     });
     return () => {
@@ -96,9 +102,12 @@ function AuthPage() {
     setError(null);
     setInfo(null);
     try {
+      const referralMetadata = referralCode
+        ? { referral_code: referralCode, device_token: getDeviceToken() }
+        : undefined;
       const { error } = await supabase.auth.signInWithOtp({
         phone: normalizedPhone,
-        options: { shouldCreateUser: true },
+        options: { shouldCreateUser: true, ...(referralMetadata ? { data: referralMetadata } : {}) },
       });
       if (error) throw error;
       setPhone(normalizedPhone);
@@ -145,9 +154,12 @@ function AuthPage() {
     try {
       const normalizedPhone = normalizePhoneNumber(phone);
       if (!normalizedPhone) throw new Error("Enter a valid mobile number.");
+      const referralMetadata = referralCode
+        ? { referral_code: referralCode, device_token: getDeviceToken() }
+        : undefined;
       const { error } = await supabase.auth.signInWithOtp({
         phone: normalizedPhone,
-        options: { shouldCreateUser: true },
+        options: { shouldCreateUser: true, ...(referralMetadata ? { data: referralMetadata } : {}) },
       });
       if (error) throw error;
       setOtp("");
