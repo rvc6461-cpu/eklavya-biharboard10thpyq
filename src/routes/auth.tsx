@@ -82,7 +82,7 @@ function AuthPage() {
   }, [search.reason]);
 
   async function claimCurrentDevice() {
-    const { data, error } = await supabase.rpc("claim_active_device_session");
+    const { data, error } = await supabase.rpc("ensure_active_device_session");
     if (error || data !== true) {
       await supabase.auth.signOut({ scope: "local" });
       throw new Error("We couldn't verify this sign-in. Please try again.");
