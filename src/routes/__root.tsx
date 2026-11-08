@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useCloudSync } from "../hooks/useCloudSync";
 import { useAppearance } from "../hooks/useAppearance";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthSessionId } from "@/lib/phase4b";
 
 function NotFoundComponent() {
   return (
@@ -151,6 +152,8 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
         const { data: sessionResult } = await supabase.auth.getSession();
         const session = sessionResult.session;
         if (!session) return;
+        const sessionId = getAuthSessionId(session.access_token);
+        if (!sessionId) return;
 
         const { data: active, error } = await supabase.rpc("ensure_active_device_session");
         if (error || active === null) return;
@@ -162,9 +165,10 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
           await router.navigate({ to: "/auth", search: { reason: "device" }, replace: true });
           return;
         }
-        if (handledSessionId !== session.id) {
+        if (handledSessionId !== sessionId) {
+          handledSessionId = sessionId;
           const revoked = await supabase.auth.signOut({ scope: "others" });
-          if (!revoked.error) handledSessionId = session.id;
+          if (revoked.error) handledSessionId = null;
         }
       } catch {
         // A temporary network failure must not sign the user out.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePhoneNumber } from "./phase4b";
+import { getAuthSessionId, normalizePhoneNumber } from "./phase4b";
 
 describe("phone authentication input", () => {
   it("normalizes a 10-digit Indian mobile number", () => {
@@ -16,5 +16,17 @@ describe("phone authentication input", () => {
 
   it("rejects a misplaced country-code plus sign", () => {
     expect(normalizePhoneNumber("98+76543210")).toBeNull();
+  });
+});
+
+describe("auth session identifier", () => {
+  it("reads the session claim from a JWT payload", () => {
+    const payload = btoa(JSON.stringify({ session_id: "session-a" }));
+    expect(getAuthSessionId(`header.${payload}.signature`)).toBe("session-a");
+  });
+
+  it("fails closed for a token without a session claim", () => {
+    const payload = btoa(JSON.stringify({ sub: "user-a" }));
+    expect(getAuthSessionId(`header.${payload}.signature`)).toBeNull();
   });
 });
