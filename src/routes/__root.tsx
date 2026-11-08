@@ -157,9 +157,6 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
 
         if (currentSessionId !== session.id) {
           currentSessionId = session.id;
-          // Best-effort revocation of other refresh sessions; database pinning
-          // still blocks older devices if this Auth request cannot reach the server.
-          void supabase.auth.signOut({ scope: "others" });
         }
 
         const { data: active, error } = await supabase.rpc("ensure_active_device_session");
@@ -171,6 +168,10 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
           await supabase.auth.signOut({ scope: "local" });
           await router.navigate({ to: "/auth", search: { reason: "device" }, replace: true });
           return;
+        }
+        if (currentSessionId === session.id) {
+          const revoked = await supabase.auth.signOut({ scope: "others" });
+          if (!revoked.error) currentSessionId = `verified:${session.id}`;
         }
       } catch {
         // A temporary network failure must not sign the user out.
