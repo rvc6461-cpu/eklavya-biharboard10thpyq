@@ -142,6 +142,7 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
     let alive = true;
     let checking = false;
     let redirected = false;
+    let revokedOtherSessionsFor: string | null = null;
 
     const verify = async () => {
       if (checking || redirected) return;
@@ -160,6 +161,12 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
           await supabase.auth.signOut({ scope: "local" });
           await router.navigate({ to: "/auth", search: { reason: "device" }, replace: true });
           return;
+        }
+        if (revokedOtherSessionsFor !== session.id) {
+          revokedOtherSessionsFor = session.id;
+          // Best-effort revocation of older refresh sessions; RLS session pinning
+          // remains the immediate enforcement if the Auth endpoint is unavailable.
+          await supabase.auth.signOut({ scope: "others" });
         }
       } catch {
         // A temporary network failure must not sign the user out.
