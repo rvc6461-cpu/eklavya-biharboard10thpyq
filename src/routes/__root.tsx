@@ -142,7 +142,7 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
     let alive = true;
     let checking = false;
     let redirected = false;
-    let currentSessionId: string | null = null;
+    let handledSessionId: string | null = null;
 
     const verify = async () => {
       if (checking || redirected) return;
@@ -150,14 +150,7 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
       try {
         const { data: sessionResult } = await supabase.auth.getSession();
         const session = sessionResult.session;
-        if (!session) {
-          currentSessionId = null;
-          return;
-        }
-
-        if (currentSessionId !== session.id) {
-          currentSessionId = session.id;
-        }
+        if (!session) return;
 
         const { data: active, error } = await supabase.rpc("ensure_active_device_session");
         if (error || active === null) return;
@@ -169,9 +162,9 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
           await router.navigate({ to: "/auth", search: { reason: "device" }, replace: true });
           return;
         }
-        if (currentSessionId === session.id) {
+        if (handledSessionId !== session.id) {
           const revoked = await supabase.auth.signOut({ scope: "others" });
-          if (!revoked.error) currentSessionId = `verified:${session.id}`;
+          if (!revoked.error) handledSessionId = session.id;
         }
       } catch {
         // A temporary network failure must not sign the user out.
@@ -185,6 +178,12 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
       if (document.visibilityState === "visible") void verify();
     };
 
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        window.setTimeout(() => void verify(), 0);
+      }
+    });
+
     void verify();
     const interval = window.setInterval(() => void verify(), 30_000);
     window.addEventListener("focus", handleResume);
@@ -195,6 +194,7 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
       window.clearInterval(interval);
       window.removeEventListener("focus", handleResume);
       document.removeEventListener("visibilitychange", handleResume);
+      authListener.subscription.unsubscribe();
     };
   }, [queryClient, router]);
 
