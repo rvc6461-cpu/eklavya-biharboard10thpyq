@@ -142,7 +142,7 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
     let alive = true;
     let checking = false;
     let redirected = false;
-    let revokedOtherSessionsFor: string | null = null;
+    let currentSessionId: string | null = null;
 
     const verify = async () => {
       if (checking || redirected) return;
@@ -150,7 +150,17 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
       try {
         const { data: sessionResult } = await supabase.auth.getSession();
         const session = sessionResult.session;
-        if (!session) return;
+        if (!session) {
+          currentSessionId = null;
+          return;
+        }
+
+        if (currentSessionId !== session.id) {
+          currentSessionId = session.id;
+          // Best-effort revocation of other refresh sessions; database pinning
+          // still blocks older devices if this Auth request cannot reach the server.
+          void supabase.auth.signOut({ scope: "others" });
+        }
 
         const { data: active, error } = await supabase.rpc("ensure_active_device_session");
         if (error || active === null) return;
@@ -161,12 +171,6 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
           await supabase.auth.signOut({ scope: "local" });
           await router.navigate({ to: "/auth", search: { reason: "device" }, replace: true });
           return;
-        }
-        if (revokedOtherSessionsFor !== session.id) {
-          revokedOtherSessionsFor = session.id;
-          // Best-effort revocation of older refresh sessions; RLS session pinning
-          // remains the immediate enforcement if the Auth endpoint is unavailable.
-          await supabase.auth.signOut({ scope: "others" });
         }
       } catch {
         // A temporary network failure must not sign the user out.
