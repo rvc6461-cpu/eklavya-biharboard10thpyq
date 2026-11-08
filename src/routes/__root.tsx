@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useCloudSync } from "../hooks/useCloudSync";
 import { useAppearance } from "../hooks/useAppearance";
 import { supabase } from "@/integrations/supabase/client";
+import { getAuthSessionId } from "@/lib/phase4b";
 
 function NotFoundComponent() {
   return (
@@ -142,6 +143,7 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
     let alive = true;
     let checking = false;
     let redirected = false;
+    let handledSessionId: string | null = null;
 
     const verify = async () => {
       if (checking || redirected) return;
@@ -150,6 +152,8 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
         const { data: sessionResult } = await supabase.auth.getSession();
         const session = sessionResult.session;
         if (!session) return;
+        const sessionId = getAuthSessionId(session.access_token);
+        if (!sessionId) return;
 
         const { data: active, error } = await supabase.rpc("ensure_active_device_session");
         if (error || active === null) return;
@@ -160,6 +164,11 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
           await supabase.auth.signOut({ scope: "local" });
           await router.navigate({ to: "/auth", search: { reason: "device" }, replace: true });
           return;
+        }
+        if (handledSessionId !== sessionId) {
+          handledSessionId = sessionId;
+          const revoked = await supabase.auth.signOut({ scope: "others" });
+          if (revoked.error) handledSessionId = null;
         }
       } catch {
         // A temporary network failure must not sign the user out.
@@ -173,6 +182,12 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
       if (document.visibilityState === "visible") void verify();
     };
 
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        window.setTimeout(() => void verify(), 0);
+      }
+    });
+
     void verify();
     const interval = window.setInterval(() => void verify(), 30_000);
     window.addEventListener("focus", handleResume);
@@ -183,6 +198,7 @@ function ActiveDeviceGate({ children }: { children: ReactNode }) {
       window.clearInterval(interval);
       window.removeEventListener("focus", handleResume);
       document.removeEventListener("visibilitychange", handleResume);
+      authListener.subscription.unsubscribe();
     };
   }, [queryClient, router]);
 

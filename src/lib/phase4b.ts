@@ -112,6 +112,18 @@ export function normalizePhoneNumber(value: string): string | null {
   return /^\+[1-9]\d{7,14}$/.test(normalized) ? normalized : null;
 }
 
+export function getAuthSessionId(accessToken: string): string | null {
+  const payload = accessToken.split(".")[1];
+  if (!payload) return null;
+  try {
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = JSON.parse(atob(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "="))) as { session_id?: unknown };
+    return typeof decoded.session_id === "string" ? decoded.session_id : null;
+  } catch {
+    return null;
+  }
+}
+
 export function notifyActiveDeviceSessionVerified(userId: string) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent("eklavya:active-device:verified", { detail: { userId } }));
