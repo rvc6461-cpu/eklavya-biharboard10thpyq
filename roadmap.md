@@ -1,5 +1,11 @@
 # Phase 4B Roadmap
 
+## Production-readiness audit
+- [ ] Regression-test authentication, active-device enforcement, main learning flows, admin, library, themes, and responsive states.
+- [ ] Review backend security findings, RLS isolation, credentials exposure, and recent runtime/network/database errors.
+- [ ] Fix verified regressions and rerun focused tests plus end-to-end preview checks.
+- [ ] Report release blockers that require real SMS, multiple devices/accounts, or Play Store configuration.
+
 - [x] Add secure referral, premium unlock, notification, feedback, and app-info backend schema.
 - [x] Add protected referral/profile/preferences functions and client data helpers.
 - [x] Add referral, notification, feedback, contact, about, settings, search, and premium screens.
